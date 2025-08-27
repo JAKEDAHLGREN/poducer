@@ -5,7 +5,7 @@ class Podcast < ApplicationRecord
   has_many :episodes
 
   # Enum to track Status state
-  enum status: { draft: 0, published: 1, archived: 2 }
+  enum :status, { draft: 0, published: 1, archived: 2 }
 
   # Validations
   validates :name, :description, :primary_category, presence: true

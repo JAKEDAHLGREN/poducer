@@ -14,4 +14,15 @@ class User < ApplicationRecord
   validates :email, presence: true, uniqueness: true
   has_many :podcasts, dependent: :destroy
   has_many :sessions, dependent: :destroy
+
+  # Token generation for email verification and password reset
+  def generate_token_for(purpose)
+    signed_id(purpose: purpose, expires_in: 20.minutes)
+  end
+
+  def self.find_by_token_for!(purpose, token)
+    find_signed!(token, purpose: purpose)
+  rescue ActiveSupport::MessageVerifier::InvalidSignature
+    raise StandardError, "Invalid token"
+  end
 end

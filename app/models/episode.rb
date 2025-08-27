@@ -7,7 +7,7 @@ class Episode < ApplicationRecord
   has_many_attached :assets
 
   # Enum to track Status state
-  enum status: { draft: 0, editing: 1, published: 2, archived: 3 }, _default: :draft
+  enum :status, { draft: 0, editing: 1, published: 2, archived: 3 }
 
   validates :name, :description, :release_date, presence: true
   validates :number, presence: true, numericality: { only_integer: true, greater_than: 0 }
