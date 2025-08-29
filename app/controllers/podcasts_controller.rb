@@ -1,4 +1,4 @@
-class PodcastController < ApplicationController
+class PodcastsController < ApplicationController
   def index
   end
 

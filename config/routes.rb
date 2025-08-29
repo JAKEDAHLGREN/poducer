@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
-  get "podcast/index"
-  get "podcast/show"
-  get "podcast/new"
+  resources :episodes, only: [:index, :show, :new, :create, :edit, :update]
+  resources :podcasts, only: [:index, :show, :new, :create, :edit, :update, :destroy]
+  resources :dashboards, only: [:index]
   get  "sign_in",  to: "sessions#new"
   post "sign_in",  to: "sessions#create"
   get  "sign_up",  to: "registrations#new"
@@ -13,7 +13,7 @@ Rails.application.routes.draw do
     resource :email_verification, only: [ :show, :create ]
     resource :password_reset,     only: [ :new, :edit, :create, :update ]
   end
-  root "podcast#index"
+  root "dashboards#index"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

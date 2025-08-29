@@ -1,6 +1,6 @@
 <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
   <h2 class="text-2xl font-bold mb-6 text-center">Create New Podcast</h2>
-  <%= form_with url: podcast_index_path, method: :get, class: "space-y-4" do |form| %>
+  <%= form_with url: podcasts_path, method: :get, class: "space-y-4" do |form| %>
     <div class="text-md font-bold">
       Podcast Information
       <div class="text-xs font-normal text-gray-500">Provide a title and short description of what your podcast is about.</div>
@@ -45,6 +45,6 @@
     <%= form.label :tertiary_category, "Tertiary Category (Optional)", class: "text-sm font-medium text-gray-700" %>
     <%= form.text_field :tertiary_category, class: "w-full rounded-md border-gray-300 shadow-sm" %>
 
-    <%= form.submit "Create my Podcast", class: "w-full bg-blue-500 text-white py-2 rounded" %>
+    <%= form.submit "Create my Podcast", class: "w-full bg-orange-600 text-white py-2 rounded" %>
   <% end %>
 </div>

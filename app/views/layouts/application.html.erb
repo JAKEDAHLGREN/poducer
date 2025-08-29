@@ -22,9 +22,15 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="bg-blue-100">
-    <main class="container mx-auto mt-28 px-5 flex">
-      <%= yield %>
-    </main>
+  <body class="bg-white">
+    <!-- Sidebar -->
+    <%= render 'shared/sidebar' %>
+
+    <!-- Main Content -->
+    <div class="ml-64 min-h-screen bg-gray-300">
+      <main class="p-8">
+        <%= yield %>
+      </main>
+    </div>
   </body>
 </html>
