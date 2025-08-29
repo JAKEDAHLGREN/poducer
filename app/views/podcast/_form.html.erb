@@ -1,0 +1,50 @@
+<div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+  <h2 class="text-2xl font-bold mb-6 text-center">Create New Podcast</h2>
+  <%= form_with url: podcast_index_path, method: :get, class: "space-y-4" do |form| %>
+    <div class="text-md font-bold">
+      Podcast Information
+      <div class="text-xs font-normal text-gray-500">Provide a title and short description of what your podcast is about.</div>
+    </div>
+    <%= form.label :name, "Name of Podcast", class: "text-sm font-medium text-gray-700" %>
+    <%= form.text_field :name, class: "w-full rounded-md border-gray-300 shadow-sm" %>
+
+    <%= form.label :description, "Description", class: "text-sm font-medium text-gray-700" %>
+    <%= form.text_area :description, class: "w-full rounded-md border-gray-300 shadow-sm" %>
+
+    <%= form.label :cover_image, "Upload Cover Image", class: "text-sm font-medium text-gray-700" %>
+    <%= form.file_field :cover_image, class: "w-full rounded-md border-gray-300 border border-dashed shadow-sm px-4 py-12" %>
+
+    <%= form.label :intro_media, "Upload Intro Media", class: "text-sm font-medium text-gray-700" %>
+    <%= form.file_field :intro_media, class: "w-full rounded-md border-gray-300 border border-dashed shadow-sm px-4 py-12" %>
+
+    <%= form.label :outro_media, "Upload Outro Media", class: "text-sm font-medium text-gray-700" %>
+    <%= form.file_field :outro_media, class: "w-full rounded-md border-gray-300 border border-dashed shadow-sm px-4 py-12" %>
+
+    <%= form.label :music, "Upload Music", class: "text-sm font-medium text-gray-700" %>
+    <%= form.file_field :music, class: "w-full rounded-md border-gray-300 border border-dashed shadow-sm px-4 py-12" %>
+
+    <div class="text-md font-bold">
+      Podcast Website
+      <div class="text-xs font-normal text-gray-500">Add your website as a way to promote and share with your listeners.</div>
+    </div>
+
+    <%= form.label :url, "Website URL", class: "text-sm font-medium text-gray-700" %>
+    <%= form.text_field :url, class: "w-full rounded-md border-gray-300 shadow-sm" %>
+
+    <div class="text-md font-bold">
+      Podcast Categories
+      <div class="text-xs font-normal text-gray-500">Choose at least one category. This is where your podcast will appear in directories, like Apple Podcast, and is a great way for listeners to find your show.</div>
+    </div>
+
+    <%= form.label :primary_category, "Primary Category", class: "text-sm font-medium text-gray-700" %>
+    <%= form.text_field :primary_category, class: "w-full rounded-md border-gray-300 shadow-sm" %>
+
+    <%= form.label :secondary_category, "Secondary Category (Optional)", class: "text-sm font-medium text-gray-700" %>
+    <%= form.text_field :secondary_category, class: "w-full rounded-md border-gray-300 shadow-sm" %>
+
+    <%= form.label :tertiary_category, "Tertiary Category (Optional)", class: "text-sm font-medium text-gray-700" %>
+    <%= form.text_field :tertiary_category, class: "w-full rounded-md border-gray-300 shadow-sm" %>
+
+    <%= form.submit "Create my Podcast", class: "w-full bg-blue-500 text-white py-2 rounded" %>
+  <% end %>
+</div>

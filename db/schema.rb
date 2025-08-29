@@ -59,15 +59,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_27_195451) do
 
   create_table "podcasts", force: :cascade do |t|
     t.integer "user_id", null: false
-    t.string "name"
+    t.string "name", null: false
     t.text "description"
     t.string "website_url"
-    t.string "primary_category"
+    t.string "primary_category", null: false
     t.string "secondary_category"
     t.string "tertiary_category"
-    t.integer "status"
+    t.integer "status", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["primary_category"], name: "index_podcasts_on_primary_category"
+    t.index ["status"], name: "index_podcasts_on_status"
     t.index ["user_id"], name: "index_podcasts_on_user_id"
   end
 
