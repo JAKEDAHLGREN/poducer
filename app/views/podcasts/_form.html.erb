@@ -1,6 +1,6 @@
 <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
   <h2 class="text-2xl font-bold mb-6 text-center">Create New Podcast</h2>
-  <%= form_with url: podcasts_path, method: :get, class: "space-y-4" do |form| %>
+  <%= form_with model: @podcast, class: "space-y-4" do |form| %>
     <div class="text-md font-bold">
       Podcast Information
       <div class="text-xs font-normal text-gray-500">Provide a title and short description of what your podcast is about.</div>
@@ -11,25 +11,16 @@
     <%= form.label :description, "Description", class: "text-sm font-medium text-gray-700" %>
     <%= form.text_area :description, class: "w-full rounded-md border-gray-300 shadow-sm" %>
 
-    <%= form.label :cover_image, "Upload Cover Image", class: "text-sm font-medium text-gray-700" %>
-    <%= form.file_field :cover_image, class: "w-full rounded-md border-gray-300 border border-dashed shadow-sm px-4 py-12" %>
-
-    <%= form.label :intro_media, "Upload Intro Media", class: "text-sm font-medium text-gray-700" %>
-    <%= form.file_field :intro_media, class: "w-full rounded-md border-gray-300 border border-dashed shadow-sm px-4 py-12" %>
-
-    <%= form.label :outro_media, "Upload Outro Media", class: "text-sm font-medium text-gray-700" %>
-    <%= form.file_field :outro_media, class: "w-full rounded-md border-gray-300 border border-dashed shadow-sm px-4 py-12" %>
-
-    <%= form.label :music, "Upload Music", class: "text-sm font-medium text-gray-700" %>
-    <%= form.file_field :music, class: "w-full rounded-md border-gray-300 border border-dashed shadow-sm px-4 py-12" %>
+    <%= form.label :cover_art, "Upload Cover Image", class: "text-sm font-medium text-gray-700" %>
+    <%= form.file_field :cover_art, class: "w-full rounded-md border-gray-300 border border-dashed shadow-sm px-4 py-12" %>
 
     <div class="text-md font-bold">
       Podcast Website
       <div class="text-xs font-normal text-gray-500">Add your website as a way to promote and share with your listeners.</div>
     </div>
 
-    <%= form.label :url, "Website URL", class: "text-sm font-medium text-gray-700" %>
-    <%= form.text_field :url, class: "w-full rounded-md border-gray-300 shadow-sm" %>
+    <%= form.label :website_url, "Website URL", class: "text-sm font-medium text-gray-700" %>
+    <%= form.text_field :website_url, class: "w-full rounded-md border-gray-300 shadow-sm" %>
 
     <div class="text-md font-bold">
       Podcast Categories
