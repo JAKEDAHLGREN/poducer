@@ -1,10 +1,11 @@
 class PodcastsController < ApplicationController
+  before_action :set_podcast, only: [ :show, :edit, :update, :destroy ]
+
   def index
     @podcasts = Podcast.all
   end
 
   def show
-    @podcast = Podcast.find(params[:id])
   end
 
   def new
@@ -25,12 +26,9 @@ class PodcastsController < ApplicationController
   end
 
   def edit
-    @podcast = Podcast.find(params[:id])
   end
 
   def update
-    @podcast = Podcast.find(params[:id])
-
     if @podcast.update(podcast_params)
       redirect_to @podcast, notice: "Podcast updated successfully"
     else
@@ -39,8 +37,6 @@ class PodcastsController < ApplicationController
   end
 
   def destroy
-    @podcast = Podcast.find(params[:id])
-
     if @podcast.destroy
       redirect_to podcasts_path, notice: "Podcast deleted successfully"
     else
@@ -49,6 +45,10 @@ class PodcastsController < ApplicationController
   end
 
   private
+
+  def set_podcast
+    @podcast = Podcast.find(params[:id])
+  end
 
   def podcast_params
     params.require(:podcast).permit(:name, :description, :website_url, :primary_category, :secondary_category, :tertiary_category, :cover_art)
