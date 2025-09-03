@@ -1,4 +1,246 @@
-<div>
-  <h1 class="font-bold text-4xl">Episodes#index</h1>
-  <p>Find me in app/views/episodes/index.html.erb</p>
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header Section -->
+    <div class="mb-8">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Episodes</h1>
+          <p class="text-gray-600 mt-2">Episodes of the "<%= @podcast.name %>" podcast</p>
+        </div>
+
+        <%= link_to podcast_path(@podcast), class: "inline-flex items-center text-orange-600 hover:text-orange-700 font-medium" do %>
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          Back to Podcast
+        <% end %>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-lg p-4 border border-gray-200">
+          <div class="flex items-center">
+            <div class="p-2 bg-blue-100 rounded-lg">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+              </svg>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm font-medium text-gray-600">Total Episodes</p>
+              <p class="text-2xl font-bold text-gray-900"><%= @episodes.count %></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg p-4 border border-gray-200">
+          <div class="flex items-center">
+            <div class="p-2 bg-green-100 rounded-lg">
+              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm font-medium text-gray-600">Published</p>
+              <p class="text-2xl font-bold text-gray-900"><%= @episodes.published.count %></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg p-4 border border-gray-200">
+          <div class="flex items-center">
+            <div class="p-2 bg-yellow-100 rounded-lg">
+              <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm font-medium text-gray-600">In Progress</p>
+              <p class="text-2xl font-bold text-gray-900"><%= @episodes.draft.count + @episodes.editing.count %></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg p-4 border border-gray-200">
+          <div class="flex items-center">
+            <div class="p-2 bg-orange-100 rounded-lg">
+              <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm font-medium text-gray-600">Next Release</p>
+              <p class="text-lg font-bold text-gray-900">
+                <% next_episode = @episodes.where('release_date > ?', Date.current).order(:release_date).first %>
+                <% if next_episode&.release_date %>
+                  <%= next_episode.release_date.strftime("%b %d") %>
+                <% else %>
+                  Not set
+                <% end %>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Bar -->
+      <div class="flex justify-between items-center">
+        <div class="flex items-center space-x-4">
+          <!-- Status Filter -->
+          <div class="flex items-center space-x-2">
+            <span class="text-sm font-medium text-gray-700">Filter:</span>
+            <%= link_to "All", podcast_episodes_path(@podcast),
+                class: "px-3 py-1 text-sm rounded-full #{params[:status].blank? ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
+            <%= link_to "Draft", podcast_episodes_path(@podcast, status: 'draft'),
+                class: "px-3 py-1 text-sm rounded-full #{params[:status] == 'draft' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
+            <%= link_to "Editing", podcast_episodes_path(@podcast, status: 'editing'),
+                class: "px-3 py-1 text-sm rounded-full #{params[:status] == 'editing' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
+            <%= link_to "Published", podcast_episodes_path(@podcast, status: 'published'),
+                class: "px-3 py-1 text-sm rounded-full #{params[:status] == 'published' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
+          </div>
+        </div>
+
+        <%= link_to new_podcast_episode_path(@podcast), class: "inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors duration-200" do %>
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          Add New Episode
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Episodes List -->
+    <% if @episodes.any? %>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Episode
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Title
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Release Date
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Audio Files
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <% @episodes.order(:number).each do |episode| %>
+                <tr class="hover:bg-gray-50 transition-colors duration-150">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                        <span class="text-orange-600 font-bold text-sm"><%= episode.number %></span>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td class="px-6 py-4">
+                    <div>
+                      <div class="text-sm font-medium text-gray-900"><%= episode.name %></div>
+                      <% if episode.description.present? %>
+                        <div class="text-sm text-gray-500 truncate max-w-xs"><%= episode.description %></div>
+                      <% end %>
+                    </div>
+                  </td>
+
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <% case episode.status %>
+                    <% when "draft" %>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        Draft
+                      </span>
+                    <% when "editing" %>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        Editing
+                      </span>
+                    <% when "published" %>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Published
+                      </span>
+                    <% when "archived" %>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        Archived
+                      </span>
+                    <% end %>
+                  </td>
+
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <% if episode.release_date.present? %>
+                      <%= episode.release_date.strftime("%B %d, %Y") %>
+                    <% else %>
+                      <span class="text-gray-400">Not set</span>
+                    <% end %>
+                  </td>
+
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center space-x-2">
+                      <% if episode.raw_audio.attached? %>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Raw
+                        </span>
+                      <% end %>
+                      <% if episode.edited_audio.attached? %>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          Edited
+                        </span>
+                      <% end %>
+                      <% if episode.assets.attached? %>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                          Assets
+                        </span>
+                      <% end %>
+                    </div>
+                  </td>
+
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div class="flex items-center space-x-2">
+                      <%= link_to podcast_episode_path(@podcast, episode), class: "text-orange-600 hover:text-orange-900" do %>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                      <% end %>
+
+                      <%= link_to edit_podcast_episode_path(@podcast, episode), class: "text-gray-600 hover:text-gray-900" do %>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% else %>
+      <!-- Empty State -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+        </svg>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No episodes yet</h3>
+        <p class="text-gray-600 mb-6">Get started by creating your first episode for this podcast.</p>
+        <%= link_to new_podcast_episode_path(@podcast), class: "inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors duration-200" do %>
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          Create Your First Episode
+        <% end %>
+      </div>
+    <% end %>
+  </div>
 </div>

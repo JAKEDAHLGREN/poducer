@@ -4,7 +4,7 @@
     <div class="flex items-center space-x-2">
       <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
         <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          <path d="M9 12l2 2 4-4m6 2a9 9 0 0118 0z"/>
         </svg>
       </div>
       <span class="text-xl font-medium text-red-600">PODUCER</span>
@@ -16,10 +16,6 @@
     <div class="space-y-2">
       <%= link_to dashboards_path, class: sidebar_link_class(dashboards_path) do %>
         Dashboard
-      <% end %>
-
-      <%= link_to episodes_path, class: sidebar_link_class(episodes_path) do %>
-        Edit Requests
       <% end %>
 
       <%= link_to podcasts_path, class: sidebar_link_class(podcasts_path, 'podcasts') do %>

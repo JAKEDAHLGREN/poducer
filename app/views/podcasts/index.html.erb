@@ -107,7 +107,7 @@
                   View
                 <% end %>
 
-                <%= link_to episodes_path(podcast_id: podcast.id), class: "flex-1 bg-orange-100 hover:bg-orange-200 text-orange-700 font-medium py-2 px-4 rounded-lg text-center text-sm transition-colors duration-200" do %>
+                <%= link_to podcast_episodes_path(podcast), class: "flex-1 bg-orange-100 hover:bg-orange-200 text-orange-700 font-medium py-2 px-4 rounded-lg text-center text-sm transition-colors duration-200" do %>
                   <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
                   </svg>

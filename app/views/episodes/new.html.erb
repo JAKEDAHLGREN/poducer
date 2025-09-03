@@ -1,4 +1,51 @@
-<div>
-  <h1 class="font-bold text-4xl">Episodes#new</h1>
-  <p>Find me in app/views/episodes/new.html.erb</p>
+<div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+  <h2 class="text-2xl font-bold mb-6 text-center">Create New Episode</h2>
+  <%= form_with model: @episode, url: podcast_episodes_path(@podcast), class: "space-y-4" do |form| %>
+    <div class="text-md font-bold">
+      Episode Information
+      <div class="text-xs font-normal text-gray-500">Provide all the necessary information for this episode.</div>
+    </div>
+
+    <%= form.label :name, "Name of Episode", class: "text-sm font-medium text-gray-700" %>
+    <%= form.text_field :name, class: "w-full rounded-md border-gray-300 shadow-sm" %>
+
+    <%= form.label :number, "Episode Number", class: "text-sm font-medium text-gray-700" %>
+    <%= form.number_field :number, class: "w-full rounded-md border-gray-300 shadow-sm" %>
+
+    <%= form.label :description, "Episode Description", class: "text-sm font-medium text-gray-700" %>
+    <%= form.text_area :description, rows: 4, class: "w-full rounded-md border-gray-300 shadow-sm" %>
+
+    <%= form.label :links, "Links or Guest names for the Episode", class: "text-sm font-medium text-gray-700" %>
+    <%= form.text_field :links, class: "w-full rounded-md border-gray-300 shadow-sm" %>
+
+    <%= form.label :release_date, "Release date", class: "text-sm font-medium text-gray-700" %>
+    <%= form.date_field :release_date, class: "w-full rounded-md border-gray-300 shadow-sm" %>
+
+    <div class="text-md font-bold">
+      Episode Format & Notes
+      <div class="text-xs font-normal text-gray-500">Additional details about the episode format and production notes.</div>
+    </div>
+
+    <%= form.label :format, "Episode Format", class: "text-sm font-medium text-gray-700" %>
+    <%= form.text_field :format, placeholder: "e.g., Interview, Solo, Panel Discussion", class: "w-full rounded-md border-gray-300 shadow-sm" %>
+
+    <%= form.label :notes, "Production Notes", class: "text-sm font-medium text-gray-700" %>
+    <%= form.text_area :notes, rows: 3, placeholder: "Any additional notes for production team", class: "w-full rounded-md border-gray-300 shadow-sm" %>
+
+    <div class="text-md font-bold">
+      Audio Files
+      <div class="text-xs font-normal text-gray-500">Upload the raw and edited audio files for this episode.</div>
+    </div>
+
+    <%= form.label :raw_audio, "Raw Audio File", class: "text-sm font-medium text-gray-700" %>
+    <%= form.file_field :raw_audio, accept: "audio/*", class: "w-full rounded-md border-gray-300 border border-dashed shadow-sm px-4 py-8" %>
+
+    <%= form.label :edited_audio, "Edited Audio File", class: "text-sm font-medium text-gray-700" %>
+    <%= form.file_field :edited_audio, accept: "audio/*", class: "w-full rounded-md border-gray-300 border border-dashed shadow-sm px-4 py-8" %>
+
+    <%= form.label :assets, "Additional Assets", class: "text-sm font-medium text-gray-700" %>
+    <%= form.file_field :assets, multiple: true, class: "w-full rounded-md border-gray-300 border border-dashed shadow-sm px-4 py-8" %>
+
+    <%= form.submit "Create Episode", class: "w-full bg-orange-600 text-white py-2 rounded hover:bg-orange-700 transition-colors" %>
+  <% end %>
 </div>

@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
-  resources :episodes, only: [ :index, :show, :new, :create, :edit, :update ]
-  resources :podcasts, only: [ :index, :show, :new, :create, :edit, :update, :destroy ]
+  resources :podcasts do
+    resources :episodes
+  end
   resources :dashboards, only: [ :index ]
   get  "sign_in",  to: "sessions#new"
   post "sign_in",  to: "sessions#create"
