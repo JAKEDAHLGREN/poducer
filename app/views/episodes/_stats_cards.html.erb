@@ -1,0 +1,64 @@
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+  <div class="bg-white rounded-lg p-4 border border-gray-200">
+    <div class="flex items-center">
+      <div class="p-2 bg-blue-100 rounded-lg">
+        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+        </svg>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm font-medium text-gray-600">Total Episodes</p>
+        <p class="text-2xl font-bold text-gray-900"><%= @episodes.count %></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg p-4 border border-gray-200">
+    <div class="flex items-center">
+      <div class="p-2 bg-green-100 rounded-lg">
+        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm font-medium text-gray-600">Published</p>
+        <p class="text-2xl font-bold text-gray-900"><%= @episodes.published.count %></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg p-4 border border-gray-200">
+    <div class="flex items-center">
+      <div class="p-2 bg-yellow-100 rounded-lg">
+        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm font-medium text-gray-600">In Progress</p>
+        <p class="text-2xl font-bold text-gray-900"><%= @episodes.draft.count + @episodes.editing.count %></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg p-4 border border-gray-200">
+    <div class="flex items-center">
+      <div class="p-2 bg-orange-100 rounded-lg">
+        <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm font-medium text-gray-600">Next Release</p>
+        <p class="text-lg font-bold text-gray-900">
+          <% next_episode = @episodes.where('release_date > ?', Date.current).order(:release_date).first %>
+          <% if next_episode&.release_date %>
+            <%= next_episode.release_date.strftime("%b %d") %>
+          <% else %>
+            Not set
+          <% end %>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

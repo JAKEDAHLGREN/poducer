@@ -1,0 +1,35 @@
+<div class="flex-row w-full mb-4">
+  <!-- Title & Buttons -->
+  <div class="flex flex-col md:flex-row md:flex md:items-center md:justify-between">
+    <div class="flex flex-col-reverse items-start justify-start gap-2 md:gap-0">
+      <div class="flex flex-col items-start justify-center sm:pb-2 gap-2">
+        <h2 class="text-2xl font-bold text-text-bold sm:truncate sm:text-3xl sm:tracking-tight whitespace-nowrap flex items-center">
+          <%= title %>
+        </h2>
+        <p class="text-sm text-gray-600">
+          <%= description %>
+        </p>
+
+        <% if content_for?(:tooltip) %>
+          <div class="relative group z-5">
+            <%#= icon("fa-solid", "question-circle", title: "Tooltip", class: "size-5 text-text-default cursor-pointer") %>
+            ?
+            <%= yield :tooltip %>
+          </div>
+        <% end %>
+      </div>
+
+      <nav class="inline-flex items-start justify-start sm:pb-2 md:hidden whitespace-nowrap" aria-label="Back">
+        <%= link_to :back, class: "flex items-center text-sm font-medium text-gray-600 dark:text-gray-100 hover:text-gray-700 hover:underline sm:mt-0 mt-10" do %>
+          <%#= icon("fa-solid", "chevron-left", class:"text-sm")%>
+          <%= "Back" %>
+        <% end %>
+      </nav>
+    </div>
+
+    <div class="flex items-center mt-2 md:mt-0 shrink-0 md:ml-4 md:justify-end">
+      <%= yield %>
+    </div>
+
+  </div>
+</div>
