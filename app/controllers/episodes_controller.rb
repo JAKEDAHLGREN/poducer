@@ -1,6 +1,6 @@
 class EpisodesController < ApplicationController
   before_action :set_podcast
-  before_action :set_episode, only: [:show, :edit, :update, :destroy]
+  before_action :set_episode, only: [ :show, :edit, :update, :destroy ]
 
   def index
     @episodes = @podcast.episodes
@@ -27,7 +27,7 @@ class EpisodesController < ApplicationController
 
   def update
     if @episode.update(episode_params)
-      redirect_to podcast_episode_path(@podcast, @episode), notice: 'Episode was successfully updated.'
+      redirect_to podcast_episode_path(@podcast, @episode), notice: "Episode was successfully updated."
     else
       render :edit, status: :unprocessable_entity
     end
@@ -35,7 +35,7 @@ class EpisodesController < ApplicationController
 
   def destroy
     @episode.destroy
-    redirect_to podcast_episodes_path(@podcast), notice: 'Episode was successfully deleted.'
+    redirect_to podcast_episodes_path(@podcast), notice: "Episode was successfully deleted."
   end
 
   private
