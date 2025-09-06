@@ -1,7 +1,24 @@
 Rails.application.routes.draw do
-  resources :podcasts do
+  namespace :admin do
+    resources :users
+  end
+
+  namespace :producer do
     resources :episodes
   end
+
+  resources :podcasts do
+    resources :episodes do
+      member do
+        patch :submit_episode
+        patch :start_editing
+        patch :complete_editing
+        patch :publish_episode
+        patch :revert_to_draft
+      end
+    end
+  end
+
   resources :dashboards, only: [ :index ]
   get  "sign_in",  to: "sessions#new"
   post "sign_in",  to: "sessions#create"

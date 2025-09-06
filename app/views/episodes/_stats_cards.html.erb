@@ -8,7 +8,7 @@
       </div>
       <div class="ml-3">
         <p class="text-sm font-medium text-gray-600">Total Episodes</p>
-        <p class="text-2xl font-bold text-gray-900"><%= @episodes.count %></p>
+        <p class="text-2xl font-bold text-gray-900"><%= @podcast.episodes.count %></p>
       </div>
     </div>
   </div>
@@ -22,7 +22,7 @@
       </div>
       <div class="ml-3">
         <p class="text-sm font-medium text-gray-600">Published</p>
-        <p class="text-2xl font-bold text-gray-900"><%= @episodes.published.count %></p>
+        <p class="text-2xl font-bold text-gray-900"><%= @podcast.episodes.episode_complete.count %></p>
       </div>
     </div>
   </div>
@@ -36,7 +36,7 @@
       </div>
       <div class="ml-3">
         <p class="text-sm font-medium text-gray-600">In Progress</p>
-        <p class="text-2xl font-bold text-gray-900"><%= @episodes.draft.count + @episodes.editing.count %></p>
+        <p class="text-2xl font-bold text-gray-900"><%= @podcast.episodes.draft.count + @podcast.episodes.editing.count %></p>
       </div>
     </div>
   </div>
@@ -51,7 +51,7 @@
       <div class="ml-3">
         <p class="text-sm font-medium text-gray-600">Next Release</p>
         <p class="text-lg font-bold text-gray-900">
-          <% next_episode = @episodes.where('release_date > ?', Date.current).order(:release_date).first %>
+          <% next_episode = @podcast.episodes.where('release_date > ?', Date.current).order(:release_date).first %>
           <% if next_episode&.release_date %>
             <%= next_episode.release_date.strftime("%b %d") %>
           <% else %>

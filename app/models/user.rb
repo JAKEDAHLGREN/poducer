@@ -1,6 +1,8 @@
-# app/models/user.rb
 class User < ApplicationRecord
   has_secure_password
+
+  has_many :podcasts, dependent: :destroy
+  has_many :sessions, dependent: :destroy
 
   # Rails 7.1+/8 nicety:
   normalizes :email, with: ->(e) { e.strip.downcase }
@@ -11,9 +13,8 @@ class User < ApplicationRecord
   enum :role, { user: 0, producer: 1, admin: 2 }
   # TODO: Implementation plan options later
   # enum plan: { base: 0, pro: 1, enterprise: 2 }
+
   validates :email, presence: true, uniqueness: true
-  has_many :podcasts, dependent: :destroy
-  has_many :sessions, dependent: :destroy
 
   # Token generation for email verification and password reset
   def generate_token_for(purpose)

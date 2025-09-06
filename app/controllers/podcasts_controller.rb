@@ -1,8 +1,9 @@
 class PodcastsController < ApplicationController
   before_action :set_podcast, only: [ :show, :edit, :update, :destroy ]
+  before_action :authorize_access_to_podcast, only: [ :show, :edit, :update, :destroy ]
 
   def index
-    @podcasts = Podcast.all
+    @podcasts = Current.user.admin? ? Podcast.all : Current.user.podcasts
   end
 
   def show
@@ -52,5 +53,9 @@ class PodcastsController < ApplicationController
 
   def podcast_params
     params.require(:podcast).permit(:name, :description, :website_url, :primary_category, :secondary_category, :tertiary_category, :cover_art)
+  end
+
+  def authorize_access_to_podcast
+    redirect_to podcasts_path, alert: "Access denied." unless Current.user.admin? || @podcast.user == Current.user
   end
 end
