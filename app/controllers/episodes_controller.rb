@@ -1,7 +1,7 @@
 class EpisodesController < ApplicationController
   before_action :set_podcast
-  before_action :set_episode, only: [ :show, :edit, :update, :destroy, :submit_episode, :start_editing, :complete_editing, :publish_episode ]
-  before_action :authorize_access_to_episode, only: [ :show, :edit, :update, :destroy, :submit_episode, :start_editing, :complete_editing, :publish_episode ]
+  before_action :set_episode, only: [ :show, :edit, :update, :destroy, :submit_episode, :start_editing, :complete_editing, :publish_episode, :revert_to_draft ]
+  before_action :authorize_access_to_episode, only: [ :show, :edit, :update, :destroy, :submit_episode, :start_editing, :complete_editing, :publish_episode, :revert_to_draft ]
   before_action :authorize_editing, only: [ :edit, :update ]
 
   def index
@@ -100,7 +100,7 @@ class EpisodesController < ApplicationController
   end
 
   def episode_params
-    params.require(:episode).permit(:name, :number, :description, :links, :release_date, :format, :notes, :raw_audio, :edited_audio, :assets)
+    params.require(:episode).permit(:name, :number, :description, :links, :release_date, :format, :notes, :raw_audio, :edited_audio, :assets, :cover_art)
   end
 
   def authorize_access_to_episode

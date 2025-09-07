@@ -26,6 +26,14 @@ class ApplicationController < ActionController::Base
     redirect_to root_path, alert: "Access denied. Admins and Producers only." unless Current.user&.admin? || Current.user&.producer?
   end
 
+  def root
+    if Current.user&.producer?
+      redirect_to producer_episodes_path
+    else
+      redirect_to dashboards_path
+    end
+  end
+
   private
 
   def authenticate

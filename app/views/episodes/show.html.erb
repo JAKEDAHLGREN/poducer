@@ -27,39 +27,23 @@
       <div class="relative">
         <div class="aspect-video bg-gradient-to-br from-blue-100 to-blue-200">
           <div class="flex items-center justify-center h-full">
-            <div class="text-center">
-              <svg class="w-24 h-24 text-blue-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-              </svg>
-              <h2 class="text-2xl font-bold text-blue-600">Episode <%= @episode.number %></h2>
-            </div>
+            <% if @episode.cover_art.attached? %>
+              <%= image_tag @episode.cover_art, class: "w-full h-full object-cover" %>
+            <% else %>
+              <div class="text-center">
+                <svg class="w-24 h-24 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                </svg>
+
+                <h2 class="text-2xl font-bold text-blue-500">Episode <%= @episode.number %></h2>
+              </div>
+            <% end %>
           </div>
         </div>
 
         <!-- Status Badge -->
         <div class="absolute top-4 right-4">
-          <% case @episode.status %>
-          <% when "draft" %>
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-              Draft
-            </span>
-          <% when "edit_requested" %>
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-              Edit Requested
-            </span>
-          <% when "editing" %>
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-              Editing
-            </span>
-          <% when "episode_complete" %>
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-              Episode Complete
-            </span>
-          <% when "archived" %>
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
-              Archived
-            </span>
-          <% end %>
+          <%= episode_status_badge(@episode.status) %>
         </div>
 
         <!-- Episode Number Badge -->
@@ -81,7 +65,7 @@
           <!-- Podcast Info -->
           <div class="flex items-center mb-4">
             <span class="text-sm text-gray-600">From podcast:</span>
-            <%= link_to @podcast.name, podcast_path(@podcast), class: "ml-2 text-orange-600 hover:text-orange-700 font-medium" %>
+            <%= link_to @podcast.name, podcast_path(@podcast), class: "ml-2 text-orange-600 hover:text-orange-700 hover:underline font-medium" %>
           </div>
 
           <!-- Stats Row -->
@@ -161,9 +145,9 @@
           <div class="bg-gray-50 rounded-lg p-4 mb-4">
             <h3 class="font-medium text-gray-900 mb-2">Raw Audio</h3>
             <% if @episode.raw_audio.attached? %>
-              <div class="flex items-center space-x-3">
-                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+              <div class="flex items-center gap-2 space-x-3">
+                <svg class="w-8 h-8 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
                 </svg>
                 <span class="text-sm text-gray-600"><%= @episode.raw_audio.filename %></span>
                 <%= link_to "Download", rails_blob_path(@episode.raw_audio, disposition: "attachment"), class: "text-orange-600 hover:text-orange-700 text-sm font-medium" %>
@@ -176,16 +160,21 @@
           <!-- Edited Audio -->
           <div class="bg-gray-50 rounded-lg p-4 mb-4">
             <h3 class="font-medium text-gray-900 mb-2">Edited Audio</h3>
-            <% if @episode.edited_audio.attached? %>
+            <% if @episode.episode_complete? && @episode.edited_audio.attached? %>
               <div class="flex items-center space-x-3">
-                <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                <svg class="w-8 h-8 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
                 </svg>
+
                 <span class="text-sm text-gray-600"><%= @episode.edited_audio.filename %></span>
                 <%= link_to "Download", rails_blob_path(@episode.edited_audio, disposition: "attachment"), class: "text-orange-600 hover:text-orange-700 text-sm font-medium" %>
               </div>
+            <% elsif @episode.editing? %>
+              <p class="text-gray-500 text-sm">Episode is currently being edited by producer</p>
+            <% elsif @episode.edit_requested? %>
+              <p class="text-gray-500 text-sm">Episode has been submitted for editing</p>
             <% else %>
-              <p class="text-gray-500 text-sm">No edited audio file uploaded</p>
+              <p class="text-gray-500 text-sm">The producer will upload the finished audio file when it is complete</p>
             <% end %>
           </div>
 
@@ -225,8 +214,8 @@
               <%= button_to submit_episode_podcast_episode_path(@podcast, @episode),
               method: :patch,
               class: "flex-1 bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200" do %>
-                <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                <svg class="w-5 h-5 mr-2 inline gap-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
                 </svg>
                 Submit for Editing
               <% end %>
@@ -237,8 +226,9 @@
                   method: :patch,
                   class: "flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200" do %>
                 <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
                 </svg>
+
                 Revert Episode Status to Draft
               <% end %>
             <% end %>
@@ -258,7 +248,7 @@
             <% if @episode.edit_requested? %>
               <%= button_to start_editing_podcast_episode_path(@podcast, @episode),
                   method: :patch,
-                  class: "flex-1 bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200" do %>
+                  class: "flex-1 bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200" do %>
                 <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
                 </svg>

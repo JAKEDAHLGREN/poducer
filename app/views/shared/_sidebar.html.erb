@@ -23,8 +23,16 @@
   <!-- Navigation Links -->
   <nav class="mt-6 px-4">
     <div class="space-y-2">
-      <%= link_to dashboards_path, class: sidebar_link_class(dashboards_path) do %>
-        Dashboard
+      <% unless Current.user.producer? %>
+        <%= link_to dashboards_path, class: sidebar_link_class(dashboards_path) do %>
+          Dashboard
+        <% end %>
+      <% end %>
+
+      <% if Current.user.producer? %>
+        <%= link_to producer_episodes_path, class: sidebar_link_class(producer_episodes_path, 'producer/episodes') do %>
+          Producer Dashboard
+        <% end %>
       <% end %>
 
       <%= link_to "#", class: "flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors" do %>
@@ -42,6 +50,8 @@
       <%= link_to "#", class: "flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors" do %>
         Help
       <% end %>
+
+      <%= button_to "Sign Out", sign_out_path, method: :delete, class: "flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors" %>
     </div>
   </nav>
 </div>

@@ -1,53 +1,183 @@
-<div class="bg-white p-8 rounded-lg shadow-md w-full max-w-2xl">
-  <h2 class="text-2xl font-bold mb-6 text-center">Create New Episode</h2>
-  <%= form_with model: @episode, url: podcast_episodes_path(@podcast), class: "space-y-4" do |form| %>
-    <div class="text-md font-bold">
-      Episode Information
-      <div class="text-xs font-normal text-gray-500">Provide all the necessary information for this episode.</div>
+<%= form_with model: [@podcast, @episode], multipart: true, class: "space-y-6" do |form| %>
+  <!-- Basic Information Section -->
+  <div class="mb-8">
+    <h2 class="text-xl font-semibold text-gray-900 mb-4">Episode Information</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="col-span-2 md:col-span-1">
+        <%= form.label :name, "Episode Title", class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= form.text_field :name, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500", placeholder: "Enter episode title" %>
+        <% if @episode.errors[:name].any? %>
+          <p class="mt-1 text-sm text-red-600"><%= @episode.errors[:name].join(", ") %></p>
+        <% end %>
+      </div>
+
+      <div>
+        <%= form.label :number, "Episode Number", class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= form.number_field :number, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500", placeholder: "1" %>
+        <% if @episode.errors[:number].any? %>
+          <p class="mt-1 text-sm text-red-600"><%= @episode.errors[:number].join(", ") %></p>
+        <% end %>
+      </div>
+
+      <!-- Cover Art Section -->
+      <div class="col-span-2 mb-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-3">Cover Art</h3>
+        <div class="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-300">
+          <% if @episode.persisted? && @episode.cover_art.attached? %>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center">
+                <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden mr-3">
+                  <%= image_tag @episode.cover_art, class: "w-full h-full object-cover" %>
+                </div>
+                <span class="text-sm font-medium text-gray-900"><%= @episode.cover_art.filename %></span>
+              </div>
+              <%= link_to "Download", rails_blob_path(@episode.cover_art, disposition: "attachment"), class: "text-orange-600 hover:text-orange-700 text-sm font-medium" %>
+            </div>
+          <% end %>
+          <%= form.file_field :cover_art, accept: "image/*", class: "w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" %>
+          <p class="mt-2 text-xs text-gray-500">
+            <% if @episode.persisted? %>
+              Upload or replace the cover image for this episode
+            <% else %>
+              Upload a cover image for this episode
+            <% end %>
+          </p>
+          <% if @episode.errors[:cover_art].any? %>
+            <p class="mt-2 text-sm text-red-600"><%= @episode.errors[:cover_art].first %></p>
+          <% end %>
+        </div>
+      </div>
     </div>
 
-    <%= form.label :name, "Name of Episode", class: "text-sm font-medium text-gray-700" %>
-    <%= form.text_field :name, class: "w-full rounded-md border-gray-300 shadow-sm" %>
+    <div class="mt-6">
+      <%= form.label :description, "Episode Description", class: "block text-sm font-medium text-gray-700 mb-2" %>
+      <%= form.text_area :description, rows: 4, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500", placeholder: "Describe what this episode is about..." %>
+      <% if @episode.errors[:description].any? %>
+        <p class="mt-1 text-sm text-red-600"><%= @episode.errors[:description].join(", ") %></p>
+      <% end %>
+    </div>
+  </div>
 
-    <%= form.label :number, "Episode Number", class: "text-sm font-medium text-gray-700" %>
-    <%= form.number_field :number, class: "w-full rounded-md border-gray-300 shadow-sm" %>
+  <!-- Episode Details Section -->
+  <div class="mb-8">
+    <h2 class="text-xl font-semibold text-gray-900 mb-4">Episode Details</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <%= form.label :release_date, "Release Date", class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= form.date_field :release_date, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" %>
+        <% if @episode.errors[:release_date].any? %>
+          <p class="mt-1 text-sm text-red-600"><%= @episode.errors[:release_date].join(", ") %></p>
+        <% end %>
+      </div>
 
-    <%= form.label :description, "Episode Description", class: "text-sm font-medium text-gray-700" %>
-    <%= form.text_area :description, rows: 4, class: "w-full rounded-md border-gray-300 shadow-sm" %>
-
-    <%= form.label :links, "Links or Guest names for the Episode", class: "text-sm font-medium text-gray-700" %>
-    <%= form.text_field :links, class: "w-full rounded-md border-gray-300 shadow-sm" %>
-
-    <%= form.label :release_date, "Release date", class: "text-sm font-medium text-gray-700" %>
-    <%= form.date_field :release_date, class: "w-full rounded-md border-gray-300 shadow-sm" %>
-
-    <div class="text-md font-bold">
-      Episode Format & Notes
-      <div class="text-xs font-normal text-gray-500">Additional details about the episode format and production notes.</div>
+      <div>
+        <%= form.label :format, "Episode Format", class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= form.select :format,
+            options_for_select([
+              ['Interview', 'Interview'],
+              ['Solo', 'Solo'],
+              ['Panel Discussion', 'Panel Discussion'],
+              ['Storytelling', 'Storytelling'],
+              ['News/Current Events', 'News/Current Events'],
+              ['Educational', 'Educational'],
+              ['Entertainment', 'Entertainment'],
+              ['Other', 'Other']
+            ], @episode.format),
+            { prompt: 'Select format' },
+            { class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" } %>
+      </div>
     </div>
 
-    <%= form.label :format, "Episode Format", class: "text-sm font-medium text-gray-700" %>
-    <%= form.text_field :format, placeholder: "MP4, MP3, etc.", class: "w-full rounded-md border-gray-300 shadow-sm" %>
-
-    <%= form.label :notes, "Production Notes", class: "text-sm font-medium text-gray-700" %>
-    <%= form.text_area :notes, rows: 3, placeholder: "Any additional notes for production team", class: "w-full rounded-md border-gray-300 shadow-sm" %>
-
-    <div class="text-md font-bold">
-      Audio Files
-      <div class="text-xs font-normal text-gray-500">Upload the raw and edited audio files for this episode.</div>
+    <div class="mt-6">
+      <%= form.label :links, "Links or Guest Names", class: "block text-sm font-medium text-gray-700 mb-2" %>
+      <%= form.text_field :links, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500", placeholder: "e.g., Guest names, website links, social media handles..." %>
+      <% if @episode.errors[:links].any? %>
+        <p class="mt-1 text-sm text-red-600"><%= @episode.errors[:links].join(", ") %></p>
+      <% end %>
     </div>
 
-    <%= form.label :raw_audio, "Raw Audio File", class: "text-sm font-medium text-gray-700" %>
-    <%= form.file_field :raw_audio, accept: "audio/*", class: "w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" %>
+    <div class="mt-6">
+      <%= form.label :notes, "Production Notes", class: "block text-sm font-medium text-gray-700 mb-2" %>
+      <%= form.text_area :notes, rows: 3, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500", placeholder: "Any additional notes for the production team..." %>
+    </div>
+  </div>
 
-    <%# Don't need this field when creating an episode, this will be after the Producer edits it and uploads it back to the User %>
+  <!-- Audio Files Section -->
+  <div class="mb-8">
+    <h2 class="text-xl font-semibold text-gray-900 mb-4">Audio Files</h2>
 
-    <%#= form.label :edited_audio, "Edited Audio File", class: "text-sm font-medium text-gray-700" %>
-    <%#= form.file_field :edited_audio, accept: "audio/*", class: "w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" %>
+    <!-- Raw Audio -->
+    <div class="mb-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-3">Raw Audio</h3>
+      <div class="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-300">
+        <% if @episode.persisted? && @episode.raw_audio.attached? %>
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center">
+              <svg class="w-8 h-8 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+              </svg>
+              <span class="text-sm font-medium text-gray-900"><%= @episode.raw_audio.filename %></span>
+            </div>
+            <%= link_to "Download", rails_blob_path(@episode.raw_audio, disposition: "attachment"), class: "text-orange-600 hover:text-orange-700 text-sm font-medium" %>
+          </div>
+        <% end %>
+        <%= form.file_field :raw_audio, accept: "audio/*", class: "w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" %>
+        <p class="mt-2 text-xs text-gray-500">
+          <% if @episode.persisted? %>
+            Upload or replace the raw audio file for this episode
+          <% else %>
+            Upload the raw audio file for this episode
+          <% end %>
+        </p>
+      </div>
+    </div>
 
-    <%= form.label :assets, "Additional Assets", class: "text-sm font-medium text-gray-700" %>
-    <%= form.file_field :assets, multiple: true, class: "w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" %>
+    <!-- Additional Assets -->
+    <div>
+      <h3 class="text-lg font-medium text-gray-900 mb-3">Additional Assets</h3>
+      <div class="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-300">
+        <% if @episode.persisted? && @episode.assets.attached? %>
+          <div class="mb-3">
+            <h4 class="text-sm font-medium text-gray-900 mb-2">Current Assets (<%= @episode.assets.count %>)</h4>
+            <div class="space-y-2">
+              <% @episode.assets.each do |asset| %>
+                <div class="flex items-center justify-between bg-white p-2 rounded border">
+                  <div class="flex items-center">
+                    <svg class="w-5 h-5 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                    </svg>
+                    <span class="text-sm text-gray-600"><%= asset.filename %></span>
+                  </div>
+                  <%= link_to "Download", rails_blob_path(asset, disposition: "attachment"), class: "text-orange-600 hover:text-orange-700 text-sm font-medium" %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+        <%= form.file_field :assets, multiple: true, class: "w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" %>
+        <p class="mt-2 text-xs text-gray-500">Upload additional files like show notes, transcripts, or images</p>
+      </div>
+    </div>
+  </div>
 
-    <%= form.submit "Create Episode", class: "w-full bg-orange-600 text-white py-2 rounded hover:bg-orange-700 transition-colors" %>
-  <% end %>
-</div>
+  <!-- Form Actions -->
+  <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+    <% if @episode.persisted? %>
+      <%= link_to podcast_episode_path(@podcast, @episode), class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500" do %>
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+        Cancel
+      <% end %>
+      <%= form.submit "Update Episode", class: "inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-200" %>
+    <% else %>
+      <%= link_to podcast_episodes_path(@podcast), class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500" do %>
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+        Cancel
+      <% end %>
+      <%= form.submit "Create Episode", class: "inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-200" %>
+    <% end %>
+  </div>
+<% end %>

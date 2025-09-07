@@ -12,6 +12,7 @@ class Episode < ApplicationRecord
   # Active Storage
   has_one_attached  :raw_audio
   has_one_attached  :edited_audio
+  has_one_attached  :cover_art
   has_many_attached :assets
 
   validates :name, :description, :release_date, presence: true

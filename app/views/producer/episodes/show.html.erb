@@ -1,0 +1,148 @@
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Episode Details</h1>
+          <p class="mt-2 text-gray-600">Podcast: <%= @episode.podcast.name %></p>
+        </div>
+        <div class="flex items-center space-x-4">
+          <% case @episode.status %>
+          <% when "edit_requested" %>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+              Edit Requested
+            </span>
+          <% when "editing" %>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+              Currently Editing
+            </span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Episode Content -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Episode Info -->
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Episode Information</h2>
+          <dl class="space-y-4">
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Episode Number</dt>
+              <dd class="mt-1 text-sm text-gray-900"><%= @episode.number %></dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Title</dt>
+              <dd class="mt-1 text-sm text-gray-900"><%= @episode.name %></dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Description</dt>
+              <dd class="mt-1 text-sm text-gray-900"><%= @episode.description %></dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Release Date</dt>
+              <dd class="mt-1 text-sm text-gray-900"><%= @episode.release_date&.strftime("%B %d, %Y") %></dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Client</dt>
+              <dd class="mt-1 text-sm text-gray-900"><%= @episode.podcast.user.email %></dd>
+            </div>
+          </dl>
+        </div>
+
+        <!-- Audio Files -->
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Audio Files</h2>
+          <div class="space-y-4">
+            <!-- Raw Audio Download -->
+            <% if @episode.raw_audio.attached? %>
+              <div class="border border-gray-200 rounded-lg p-4">
+                <h3 class="text-sm font-medium text-gray-900 mb-2">Raw Audio</h3>
+                <p class="text-sm text-gray-500 mb-2"><%= @episode.raw_audio.filename %></p>
+                <%= link_to "Download", rails_blob_path(@episode.raw_audio, disposition: "attachment"),
+                    class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" %>
+              </div>
+            <% else %>
+              <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                <p class="text-sm text-gray-500">No raw audio file available</p>
+              </div>
+            <% end %>
+
+            <!-- Edited Audio Upload/Download -->
+            <div class="border border-gray-200 rounded-lg p-4">
+              <h3 class="text-sm font-medium text-gray-900 mb-2">Edited Audio</h3>
+              <% if @episode.edited_audio.attached? %>
+                <p class="text-sm text-gray-500 mb-2"><%= @episode.edited_audio.filename %></p>
+                <%= link_to "Download", rails_blob_path(@episode.edited_audio, disposition: "attachment"),
+                    class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 mb-2" %>
+              <% else %>
+                <p class="text-sm text-gray-500 mb-2">No edited audio uploaded yet</p>
+              <% end %>
+
+              <!-- Upload Form -->
+              <%= form_with model: [:producer, @episode], local: true, multipart: true do |form| %>
+                <div class="mt-2">
+                  <%= form.file_field :edited_audio,
+                      class: "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" %>
+                </div>
+                <div class="mt-3">
+                  <%= form.submit "Upload Edited Audio",
+                      class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700" %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes Section -->
+      <div class="mt-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Notes</h2>
+        <% if @episode.notes.present? %>
+          <div class="bg-gray-50 rounded-lg p-4 mb-4">
+            <p class="text-sm text-gray-900"><%= @episode.notes %></p>
+          </div>
+        <% end %>
+
+        <!-- Add Producer Notes -->
+        <%= form_with model: [:producer, @episode], local: true do |form| %>
+          <div class="mb-4">
+            <%= form.label :notes, "Add Producer Notes", class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.text_area :notes,
+                placeholder: "Add any notes about the editing process...",
+                class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm" %>
+          </div>
+          <div>
+            <%= form.submit "Update Notes",
+                class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700" %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Actions -->
+      <div class="mt-8 pt-6 border-t border-gray-200">
+        <div class="flex items-center justify-between">
+          <%= link_to producer_episodes_path, class: "text-gray-600 hover:text-gray-900" do %>
+            ← Back to Episodes
+          <% end %>
+
+          <div class="flex items-center space-x-4">
+            <% if @episode.edit_requested? %>
+              <%= button_to "Start Editing",
+                  start_editing_producer_episode_path(@episode),
+                  method: :patch,
+                  class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500" %>
+            <% elsif @episode.editing? %>
+              <%= button_to "Complete Editing",
+                  complete_editing_producer_episode_path(@episode),
+                  method: :patch,
+                  class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
