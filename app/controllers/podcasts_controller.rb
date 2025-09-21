@@ -1,6 +1,6 @@
 class PodcastsController < ApplicationController
   before_action :set_podcast, only: [ :show, :edit, :update, :destroy ]
-  before_action :authorize_access_to_podcast, only: [ :show, :edit, :update, :destroy ]
+  before_action -> { authorize_resource_access(@podcast) }, only: [ :show, :edit, :update, :destroy ]
 
   def index
     @podcasts = Current.user.admin? ? Podcast.all : Current.user.podcasts
@@ -20,7 +20,6 @@ class PodcastsController < ApplicationController
     if @podcast.save
       redirect_to @podcast, notice: "Podcast created successfully"
     else
-      # Add this line to see validation errors in the logs
       Rails.logger.error "Podcast validation errors: #{@podcast.errors.full_messages}"
       render :new, status: :unprocessable_entity
     end
@@ -53,9 +52,5 @@ class PodcastsController < ApplicationController
 
   def podcast_params
     params.require(:podcast).permit(:name, :description, :website_url, :primary_category, :secondary_category, :tertiary_category, :cover_art)
-  end
-
-  def authorize_access_to_podcast
-    redirect_to podcasts_path, alert: "Access denied." unless Current.user.admin? || @podcast.user == Current.user
   end
 end

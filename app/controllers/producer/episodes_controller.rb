@@ -44,10 +44,6 @@ class Producer::EpisodesController < ApplicationController
 
   private
 
-  def ensure_producer
-    redirect_to root_path, alert: "Access denied." unless Current.user&.producer?
-  end
-
   def set_episode
     @episode = Episode.find(params[:id])
   end

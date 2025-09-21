@@ -1,29 +1,30 @@
 class ApplicationController < ActionController::Base
+  include Authorizable
+
   allow_browser versions: :modern
 
   before_action :set_current_request_details
   before_action :authenticate
 
-  # Check if user is logged in and has a role
   helper_method :current_user_role
 
   def current_user_role
     Current.user&.role
   end
 
-  # Restrict access to Producer-only actions
+  # Convenience methods that use the concern
   def ensure_producer
-    redirect_to root_path, alert: "Access denied. Producers only." unless Current.user&.producer?
+    ensure_role(:producer)
   end
 
-  # Restrict access to Admin-only actions
   def ensure_admin
-    redirect_to root_path, alert: "Access denied. Admins only." unless Current.user&.admin?
+    ensure_role(:admin)
   end
 
-  # Restricts access to Admins and Producer
   def ensure_admin_or_producer
-    redirect_to root_path, alert: "Access denied. Admins and Producers only." unless Current.user&.admin? || Current.user&.producer?
+    unless Current.user&.admin? || Current.user&.producer?
+      redirect_to root_path, alert: "Access denied. Admins and Producers only."
+    end
   end
 
   def root

@@ -1,7 +1,7 @@
 class EpisodesController < ApplicationController
   before_action :set_podcast
   before_action :set_episode, only: [ :show, :edit, :update, :destroy, :submit_episode, :start_editing, :complete_editing, :publish_episode, :revert_to_draft ]
-  before_action :authorize_access_to_episode, only: [ :show, :edit, :update, :destroy, :submit_episode, :start_editing, :complete_editing, :publish_episode, :revert_to_draft ]
+  before_action -> { authorize_resource_access(@episode) }, only: [ :show, :edit, :update, :destroy, :submit_episode, :start_editing, :complete_editing, :publish_episode, :revert_to_draft ]
   before_action :authorize_editing, only: [ :edit, :update ]
 
   def index
@@ -103,13 +103,8 @@ class EpisodesController < ApplicationController
     params.require(:episode).permit(:name, :number, :description, :links, :release_date, :format, :notes, :raw_audio, :edited_audio, :assets, :cover_art)
   end
 
-  def authorize_access_to_episode
-    redirect_to podcast_episodes_path(@podcast), alert: "Access denied." unless Current.user.admin? || @episode.podcast.user == Current.user
-  end
-
+  # This method can stay as-is since it has specific business logic
   def authorize_editing
-    # Users can only edit their own episodes
-    # Producers can edit any episode (for now)
     if Current.user.user?
       redirect_to podcast_episodes_path(@podcast), alert: "Access denied." unless @episode.podcast.user == Current.user
     end
