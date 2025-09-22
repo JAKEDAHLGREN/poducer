@@ -1,15 +1,29 @@
 <%# Add Media %>
 
 <%= render 'form', locals: { step: step, steps: @steps } do |f| %>
+  <%= render "podcast_steps/progress_bar", wizard_steps: @steps %>
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
     <div class="p-8">
-      <%= render "podcast_steps/progress_bar", wizard_steps: @steps %>
       <div class="field mb-4">
-        <%= f.label :media, "Upload Media Files", class: "block text-sm font-medium text-gray-700" %>
-        <%= f.file_field :media, multiple: true, class: "w-full mt-2 text-sm text-gray-500 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" %>
+        <%= f.label :media, "Upload Media Files", class: "block text-md font-medium text-black" %>
+        <% if @podcast.media.any? %>
+          <div class="mt-1 mb-2">
+            <p class="text-sm text-gray-900"><%= pluralize(@podcast.media.count, 'file') %> currently uploaded</p>
+            <div class="mt-1 space-y-1">
+              <% @podcast.media.limit(3).each do |media_file| %>
+                <p class="text-xs text-gray-500">• <%= media_file.filename %></p>
+              <% end %>
+              <% if @podcast.media.count > 3 %>
+                <p class="text-xs text-gray-500">... and <%= @podcast.media.count - 3 %> more</p>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <%= f.file_field :media, multiple: true, class: "w-full mt-2 text-sm focus:outline-orange-500 rounded-full text-gray-500 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-600 file:text-white hover:file:bg-orange-700" %>
       </div>
-      <%= render "podcast_steps/pagination", f: f, step: step %>
     </div>
   </div>
+  <%= render "podcast_steps/pagination", f: f, step: step %>
 
 <% end %>

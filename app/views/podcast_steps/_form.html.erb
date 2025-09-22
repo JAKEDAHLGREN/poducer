@@ -1,5 +1,5 @@
-<div class="min-h-screen bg-gray-50 rounded-lg px-2 py-8">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen px-2 py-8">
+  <div class="max-w-7xl px-4 sm:px-6 lg:px-8">
     <!-- Back Navigation -->
     <div class="mb-6">
       <%= link_to @podcast.persisted? ? podcast_path(@podcast) : podcasts_path, class: "inline-flex items-center text-orange-600 hover:text-orange-700 font-medium" do %>
@@ -11,9 +11,9 @@
     </div>
 
     <% if @podcast.persisted? && @podcast.published? %>
-      <%= render "shared/page_heading", title: "Edit Podcast", description: "Update your podcast information and settings" %>
+      <%= render "shared/page_heading", title: "EDIT PODCAST", description: "Update your podcast information and settings" %>
     <% else %>
-      <%= render "shared/page_heading", title: "Create a New Podcast", description: "Start by providing basic details" %>
+      <%= render "shared/page_heading", title: "PODCAST DETAILS", description: "Start by providing basic information" %>
     <% end %>
 
     <%= form_for @podcast, url: podcast_wizard_path, method: :patch do |f| %>

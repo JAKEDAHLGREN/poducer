@@ -23,12 +23,12 @@
 
           <div class="grid grid-cols-1 gap-4">
             <div class="field">
-              <%= f.label :name, class: "block text-sm font-medium text-gray-700" %>
+              <%= f.label :name, class: "block text-sm font-medium text-black" %>
               <%= f.text_field :name, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
             </div>
 
             <div class="field">
-              <%= f.label :description, class: "block text-sm font-medium text-gray-700" %>
+              <%= f.label :description, class: "block text-sm font-medium text-black" %>
               <%= f.text_area :description, rows: 4, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
             </div>
           </div>
@@ -40,7 +40,7 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="field">
-              <%= f.label :cover_art, "Cover Art", class: "block text-sm font-medium text-gray-700" %>
+              <%= f.label :cover_art, "Cover Art", class: "block text-sm font-medium text-black" %>
               <% if @podcast.cover_art.attached? %>
                 <div class="mt-1 mb-2">
                   <div class="flex items-center space-x-3">
@@ -52,12 +52,12 @@
                   </div>
                 </div>
               <% end %>
-              <%= f.file_field :cover_art, class: "mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" %>
+              <%= f.file_field :cover_art, class: "w-full mt-2 text-sm text-gray-500 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-600 file:text-white hover:file:bg-orange-700" %>
               <p class="mt-1 text-xs text-gray-500">Upload a new image to replace the current cover art</p>
             </div>
 
             <div class="field">
-              <%= f.label :media, "Media Files", class: "block text-sm font-medium text-gray-700" %>
+              <%= f.label :media, "Media Files", class: "block text-sm font-medium text-black" %>
               <% if @podcast.media.any? %>
                 <div class="mt-1 mb-2">
                   <p class="text-sm text-gray-900"><%= pluralize(@podcast.media.count, 'file') %> currently uploaded</p>
@@ -71,7 +71,7 @@
                   </div>
                 </div>
               <% end %>
-              <%= f.file_field :media, multiple: true, class: "mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" %>
+              <%= f.file_field :media, multiple: true, class: "mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-600 file:text-white hover:file:bg-orange-700" %>
               <p class="mt-1 text-xs text-gray-500">Upload additional media files (existing files will be kept)</p>
             </div>
           </div>
@@ -82,7 +82,7 @@
           <h3 class="text-lg font-medium text-gray-900 mb-4">Website</h3>
 
           <div class="field">
-            <%= f.label :website_url, "Website URL", class: "block text-sm font-medium text-gray-700" %>
+            <%= f.label :website_url, "Website URL", class: "block text-sm font-medium text-black" %>
             <%= f.url_field :website_url, placeholder: "https://your-podcast-website.com", class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
           </div>
         </div>
@@ -93,17 +93,17 @@
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="field">
-              <%= f.label :primary_category, "Primary Category", class: "block text-sm font-medium text-gray-700" %>
+              <%= f.label :primary_category, "Primary Category", class: "block text-sm font-medium text-black" %>
               <%= f.text_field :primary_category, placeholder: "e.g., Technology", class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
             </div>
 
             <div class="field">
-              <%= f.label :secondary_category, "Secondary Category", class: "block text-sm font-medium text-gray-700" %>
+              <%= f.label :secondary_category, "Secondary Category", class: "block text-sm font-medium text-black" %>
               <%= f.text_field :secondary_category, placeholder: "e.g., Business (optional)", class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
             </div>
 
             <div class="field">
-              <%= f.label :tertiary_category, "Tertiary Category", class: "block text-sm font-medium text-gray-700" %>
+              <%= f.label :tertiary_category, "Tertiary Category", class: "block text-sm font-medium text-black" %>
               <%= f.text_field :tertiary_category, placeholder: "e.g., Education (optional)", class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
             </div>
           </div>
