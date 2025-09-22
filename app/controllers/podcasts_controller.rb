@@ -9,30 +9,38 @@ class PodcastsController < ApplicationController
   def show
   end
 
+  def start_wizard
+    @podcast = Podcast.new(user: Current.user, status: :draft)
+    @podcast.save!(validate: false)  # Skip validations for initial creation
+    redirect_to podcast_wizard_path(@podcast.id, :overview), notice: "Started creating your podcast."
+  end
+
   def new
     @podcast = Podcast.new
   end
 
   def create
-    @podcast = Podcast.new(podcast_params)
-    @podcast.user = Current.user
-
+    @podcast = Podcast.new(podcast_params.merge(user: Current.user, status: :draft))
+    Rails.logger.debug "Saving podcast: #{@podcast.inspect}"
     if @podcast.save
-      redirect_to @podcast, notice: "Podcast created successfully"
+      Rails.logger.debug "Podcast saved successfully, redirecting to wizard"
+      redirect_to podcast_wizard_path(@podcast.id, :overview), notice: "Started creating your podcast."
     else
-      Rails.logger.error "Podcast validation errors: #{@podcast.errors.full_messages}"
-      render :new, status: :unprocessable_entity
+      Rails.logger.debug "Podcast save failed: #{@podcast.errors.full_messages.join(', ')}"
+      render :new
     end
   end
 
   def edit
+    @podcast.status = :draft unless @podcast.persisted? && @podcast.status == :published
   end
 
   def update
-    if @podcast.update(podcast_params)
+    @podcast.assign_attributes(podcast_params)
+    if @podcast.save
       redirect_to @podcast, notice: "Podcast updated successfully"
     else
-      render :edit, status: :unprocessable_entity
+      render :edit
     end
   end
 
@@ -51,6 +59,6 @@ class PodcastsController < ApplicationController
   end
 
   def podcast_params
-    params.require(:podcast).permit(:name, :description, :website_url, :primary_category, :secondary_category, :tertiary_category, :cover_art)
+    params.require(:podcast).permit(:name, :description, :website_url, :primary_category, :secondary_category, :tertiary_category, :cover_art, media: [])
   end
 end

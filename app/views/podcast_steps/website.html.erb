@@ -1,0 +1,15 @@
+<%# Website Details %>
+
+<%= render 'form', locals: { step: step, steps: @steps } do |f| %>
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="p-8">
+      <%= render "podcast_steps/progress_bar", wizard_steps: @steps %>
+      <div class="field mb-4">
+        <%= f.label :website_url, class: "block text-sm font-medium text-gray-700" %>
+        <%= f.text_field :website_url, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm" %>
+      </div>
+      <%= render "podcast_steps/pagination", f: f, step: step %>
+    </div>
+  </div>
+
+<% end %>

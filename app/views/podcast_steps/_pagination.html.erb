@@ -1,0 +1,16 @@
+<div class="flex actions mt-4 gap-2 items-center justify-end">
+  <% if step == :summary && @podcast.persisted? && @podcast.published? %>
+    <%= link_to "Back to Podcast", podcast_path(@podcast), class: "inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500" %>
+  <% elsif step != :overview %>
+    <%= link_to "Back", previous_wizard_path, class: "inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500" %>
+  <% end %>
+  <% if step == :summary %>
+    <% if @podcast.persisted? && @podcast.published? %>
+      <%= f.submit "Update Podcast", class: "inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+    <% else %>
+      <%= f.submit "Finish Podcast", class: "inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>
+    <% end %>
+  <% else %>
+    <%= f.submit "Next", class: "inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500" %>
+  <% end %>
+</div>

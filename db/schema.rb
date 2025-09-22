@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_06_205357) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_22_000648) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -59,10 +59,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_205357) do
 
   create_table "podcasts", force: :cascade do |t|
     t.integer "user_id", null: false
-    t.string "name", null: false
+    t.string "name"
     t.text "description"
     t.string "website_url"
-    t.string "primary_category", null: false
+    t.string "primary_category"
     t.string "secondary_category"
     t.string "tertiary_category"
     t.integer "status", default: 0, null: false

@@ -8,9 +8,11 @@ class Podcast < ApplicationRecord
   # Enum to track Status state
   enum :status, { draft: 0, published: 1, archived: 2 }
 
-  # Validations
-  validates :name, :description, :primary_category, presence: true
+  # Validations - simplified
+  validates :name, :description, presence: true
   validates :website_url, format: URI::DEFAULT_PARSER.make_regexp(%w[http https]), allow_blank: true
+  # Remove the conditional validation - validate primary_category only when publishing
+  validates :primary_category, presence: true, if: :published?
 
   # (Optional) normalize/canonicalize categories and URLs
   before_validation do

@@ -2,7 +2,7 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="mb-8">
       <%= render "shared/page_heading", title: "Podcasts", description: "Manage and track all your podcast content" do %>
-        <%= link_to new_podcast_path, class: "inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors duration-200" do %>
+        <%= link_to start_wizard_podcasts_path, data: { turbo_method: :post }, class: "inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors duration-200" do %>
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
           </svg>
@@ -105,7 +105,7 @@
         </div>
         <h3 class="text-lg font-medium text-gray-900 mb-2">No podcasts yet</h3>
         <p class="text-gray-600 mb-6">Get started by creating your first podcast</p>
-        <%= link_to new_podcast_path, class: "inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors duration-200" do %>
+        <%= link_to start_wizard_podcasts_path, data: { turbo_method: :post }, class: "inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors duration-200" do %>
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
           </svg>
