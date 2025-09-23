@@ -31,7 +31,7 @@ class ApplicationController < ActionController::Base
     if Current.user&.producer?
       redirect_to producer_episodes_path
     else
-      redirect_to dashboards_path
+      redirect_to podcasts_path
     end
   end
 

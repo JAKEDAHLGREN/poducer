@@ -1,6 +1,6 @@
 class RegistrationsController < ApplicationController
   skip_before_action :authenticate
-
+  layout "registration"
   def new
     @user = User.new
   end

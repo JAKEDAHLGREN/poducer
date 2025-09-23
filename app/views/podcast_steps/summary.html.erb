@@ -83,7 +83,8 @@
 
           <div class="field">
             <%= f.label :website_url, "Website URL", class: "block text-sm font-medium text-black" %>
-            <%= f.url_field :website_url, placeholder: "https://your-podcast-website.com", class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
+            <%= f.text_field :website_url, placeholder: "https://your-podcast-website.com", class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
+            <p class="mt-1 text-xs text-gray-500">Enter your website URL (we'll automatically add https:// if needed)</p>
           </div>
         </div>
 

@@ -1,25 +1,19 @@
-<div class="min-h-screen bg-gray-50 rounded-lg px-2 py-8">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen rounded-lg px-2 py-8">
+  <div class="max-w-7xl px-4 sm:px-6 lg:px-8">
+    <%# Back Navigation %>
+    <div class="mb-6">
+      <%= link_to producer_episodes_path, class: "inline-flex items-center text-orange-600 hover:text-orange-700 font-medium" do %>
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+
+        Back to Episodes
+      <% end %>
+    </div>
+
     <!-- Header -->
     <div class="mb-8">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">Episode Details</h1>
-          <p class="mt-2 text-gray-600">Podcast: <%= @episode.podcast.name %></p>
-        </div>
-        <div class="flex items-center space-x-4">
-          <% case @episode.status %>
-          <% when "edit_requested" %>
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-              Edit Requested
-            </span>
-          <% when "editing" %>
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-              Currently Editing
-            </span>
-          <% end %>
-        </div>
-      </div>
+        <h1 class="text-3xl font-bold text-gray-900">Episode Details</h1>
     </div>
 
     <!-- Episode Content -->
@@ -27,8 +21,26 @@
       <div class="flex flex-col gap-4">
         <!-- Episode Info -->
         <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-4">Episode Information</h2>
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Episode Information</h2>
+            <div class="flex items-center space-x-4">
+              <% case @episode.status %>
+              <% when "edit_requested" %>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                  Edit Requested
+                </span>
+              <% when "editing" %>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                  Currently Editing
+                </span>
+              <% end %>
+            </div>
+          </div>
           <div class="space-y-4">
+            <div>
+              <div class="text-sm font-medium text-gray-500">Podcast</div>
+              <div class="mt-1 text-sm text-gray-900"><%= @episode.podcast.name %></div>
+            </div>
             <div>
               <div class="text-sm font-medium text-gray-500">Episode Number</div>
               <div class="mt-1 text-sm text-gray-900"><%= @episode.number %></div>
@@ -102,18 +114,13 @@
       <!-- Notes Section -->
       <div class="mt-8">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">Notes</h2>
-        <% if @episode.notes.present? %>
-          <div class="bg-gray-50 rounded-lg p-4 mb-4">
-            <p class="text-sm text-gray-900"><%= @episode.notes %></p>
-          </div>
-        <% end %>
-
-        <!-- Adiv Producer Notes -->
+        <!-- Producer Notes -->
         <%= form_with model: [:producer, @episode], local: true do |form| %>
           <div class="mb-4">
-            <%= form.label :notes, "Adiv Producer Notes", class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.label :notes, "Producer Notes", class: "block text-sm font-medium text-gray-700 mb-2" %>
             <%= form.text_area :notes,
-                placeholder: "Adiv any notes about the editing process...",
+                value: @episode.notes,
+                placeholder: "Any notes about the editing process...",
                 class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm" %>
           </div>
           <div>
@@ -125,12 +132,7 @@
 
       <!-- Actions -->
       <div class="mt-8 pt-6 border-t border-gray-200">
-        <div class="flex items-center justify-between">
-          <%= link_to producer_episodes_path, class: "text-gray-600 hover:text-gray-900" do %>
-            ← Back to Episodes
-          <% end %>
-
-          <div class="flex items-center space-x-4">
+          <div class="flex items-center justify-end space-x-4">
             <% if @episode.edit_requested? %>
               <%= button_to "Start Editing",
                   start_editing_producer_episode_path(@episode),

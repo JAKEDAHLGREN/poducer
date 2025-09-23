@@ -10,20 +10,13 @@ class Podcast < ApplicationRecord
 
   # Validations - simplified
   validates :name, :description, presence: true
-  validates :website_url, format: URI::DEFAULT_PARSER.make_regexp(%w[http https]), allow_blank: true
-  # Remove the conditional validation - validate primary_category only when publishing
+  validates :website_url, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid URL" }, allow_blank: true
   validates :primary_category, presence: true, if: :published?
 
-  # (Optional) normalize/canonicalize categories and URLs
+  # Normalize categories only
   before_validation do
-    self.website_url = website_url&.strip
     self.primary_category   = primary_category&.strip
     self.secondary_category = secondary_category&.strip.presence
     self.tertiary_category  = tertiary_category&.strip.presence
-
-    # Add https:// if no protocol is specified
-    if website_url.present? && !website_url.match?(%r{^https?://})
-      self.website_url = "https://#{website_url}"
-    end
   end
 end

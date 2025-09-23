@@ -3,13 +3,19 @@ class PodcastsController < ApplicationController
   before_action -> { authorize_resource_access(@podcast) }, only: [ :show, :edit, :update, :destroy ]
 
   def index
-    @podcasts = Current.user.admin? ? Podcast.all : Current.user.podcasts
+    # Filter out empty draft podcasts - only show drafts that have at least a name
+    base_podcasts = Current.user.admin? ? Podcast.all : Current.user.podcasts
+    @podcasts = base_podcasts.where.not(status: :draft, name: [ nil, "" ])
+                            .or(base_podcasts.where(status: [ :published, :archived ]))
   end
 
   def show
   end
 
   def start_wizard
+    # Clean up any existing abandoned drafts for this user first
+    Current.user.podcasts.draft.where(name: [ nil, "" ]).destroy_all
+
     @podcast = Podcast.new(user: Current.user, status: :draft)
     @podcast.save!(validate: false)  # Skip validations for initial creation
     redirect_to podcast_wizard_path(@podcast.id, :overview), notice: "Started creating your podcast."

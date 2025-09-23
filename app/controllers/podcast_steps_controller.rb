@@ -11,7 +11,11 @@ class PodcastStepsController < ApplicationController
 
   def update
     # Only assign attributes if there are podcast params (not on summary step)
-    @podcast.attributes = podcast_params if params[:podcast].present?
+    if params[:podcast].present?
+      @podcast.attributes = podcast_params
+      # Manually normalize the website URL before validation
+      normalize_website_url
+    end
 
     if @podcast.valid? || step == steps.last
       if @podcast.save
@@ -41,6 +45,16 @@ class PodcastStepsController < ApplicationController
 
   def podcast_params
     params.require(:podcast).permit(:name, :description, :website_url, :primary_category, :secondary_category, :tertiary_category, :cover_art, media: [])
+  end
+
+  def normalize_website_url
+    if @podcast.website_url.present?
+      url = @podcast.website_url.strip
+      unless url.match?(%r{^https?://})
+        url = "https://#{url}"
+      end
+      @podcast.website_url = url
+    end
   end
 
   def redirect_to_finish_wizard

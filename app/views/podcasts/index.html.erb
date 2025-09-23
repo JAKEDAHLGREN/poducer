@@ -1,6 +1,6 @@
-<div class="min-h-screen bg-gray-50 rounded-lg py-8">
+<div class="min-h-screen rounded-lg py-8">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="mb-8">
+    <div class="mb-6">
       <%= render "shared/page_heading", title: "Podcasts", description: "Manage and track all your podcast content" do %>
         <%= link_to start_wizard_podcasts_path, data: { turbo_method: :post }, class: "inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors duration-200" do %>
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -13,7 +13,7 @@
 
     <!-- Podcasts Grid -->
     <% if @podcasts.any? %>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         <% @podcasts.each do |podcast| %>
           <div class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 overflow-hidden">
             <!-- Cover Art Section -->
