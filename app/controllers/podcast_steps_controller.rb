@@ -6,30 +6,58 @@ class PodcastStepsController < ApplicationController
   before_action :set_steps
 
   def show
+    # Clear any stored errors when showing a fresh form
+    session.delete(:validation_errors)
     render_wizard
   end
 
   def update
+    # Clear any previous errors
+    session.delete(:validation_errors)
+
     # Only assign attributes if there are podcast params (not on summary step)
     if params[:podcast].present?
-      @podcast.attributes = podcast_params
+      @podcast.assign_attributes(podcast_params)
       # Manually normalize the website URL before validation
       normalize_website_url
     end
 
-    if @podcast.valid? || step == steps.last
-      if @podcast.save
-        if step == steps.last
-          @podcast.update(status: :published)
-          redirect_to podcasts_path, notice: "Podcast created successfully"
-        else
+    # Add debugging
+    Rails.logger.debug "Current step: #{step}"
+    Rails.logger.debug "Podcast name: '#{@podcast.name}'"
+    Rails.logger.debug "Podcast description: '#{@podcast.description}'"
+
+    # For summary step, we don't need to validate - just publish
+    if step == steps.last
+      @podcast.update(status: :published)
+      redirect_to podcasts_path, notice: "Podcast created successfully"
+    else
+      # Validate based on current step using a custom context
+      valid = case step
+      when :overview
+        @podcast.valid?(:overview_step)
+      when :categories
+        @podcast.valid?(:categories_step)
+      else
+        true # No validation for other steps
+      end
+
+      Rails.logger.debug "Is valid for #{step}?: #{valid}"
+      Rails.logger.debug "Errors: #{@podcast.errors.full_messages}"
+
+      if valid
+        # Save the podcast at each step to preserve data (including files)
+        if @podcast.save(validate: false) # Save without validation since we already validated
           redirect_to next_wizard_path
+        else
+          render step
         end
       else
-        render_wizard
+        # Store errors in session to survive the render
+        session[:validation_errors] = @podcast.errors.full_messages
+        Rails.logger.debug "Storing errors in session: #{session[:validation_errors].inspect}"
+        render step
       end
-    else
-      render_wizard
     end
   end
 

@@ -2,7 +2,7 @@
   <div class="max-w-7xl px-4 sm:px-6 lg:px-8">
     <!-- Back Navigation -->
     <div class="mb-6">
-      <%= link_to @podcast.persisted? ? podcast_path(@podcast) : podcasts_path, class: "inline-flex items-center text-orange-600 hover:text-orange-700 font-medium" do %>
+      <%= link_to podcasts_path, class: "inline-flex items-center text-orange-600 hover:text-orange-700 font-medium" do %>
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
         </svg>
@@ -16,7 +16,7 @@
       <%= render "shared/page_heading", title: "PODCAST DETAILS", description: "Start by providing basic information" %>
     <% end %>
 
-    <%= form_for @podcast, url: podcast_wizard_path, method: :patch do |f| %>
+    <%= form_for( @podcast, url: podcast_wizard_path, method: :patch, data: {turbo: false}) do |f| %>
       <%= yield f %>
     <% end %>
   </div>

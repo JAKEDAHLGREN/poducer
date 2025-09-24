@@ -5,12 +5,18 @@
     <div class="p-8">
       <div class="field mb-4">
         <%= f.label :name, class: "block text-md font-medium text-black" %>
-        <%= f.text_field :name, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm" %>
+        <%= f.text_field :name, class: "mt-1 block w-full rounded-md shadow-sm focus:ring-orange-500 sm:text-sm #{@podcast.errors[:name].any? ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-orange-500'}" %>
+        <% @podcast.errors.full_messages_for(:name).each do |message| %>
+          <p class="mt-1 text-sm text-red-600"><%= message %></p>
+        <% end %>
       </div>
 
       <div class="field mb-4">
         <%= f.label :description, class: "block text-md font-medium text-black" %>
-        <%= f.text_area :description, rows: 5, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm" %>
+        <%= f.text_area :description, rows: 5, class: "mt-1 block w-full rounded-md shadow-sm focus:ring-orange-500 sm:text-sm #{@podcast.errors[:description].any? ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-orange-500'}" %>
+        <% @podcast.errors.full_messages_for(:description).each do |message| %>
+          <p class="mt-1 text-sm text-red-600"><%= message %></p>
+        <% end %>
       </div>
     </div>
   </div>
