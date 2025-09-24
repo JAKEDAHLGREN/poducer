@@ -11,7 +11,7 @@ class Podcast < ApplicationRecord
   # Validations - simplified
   validates :name, :description, presence: true
   validates :website_url, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid URL" }, allow_blank: true
-  validates :primary_category, presence: true, if: :published?
+  validates :primary_category, presence: true, on: :categories_step
 
   # Normalize categories only
   before_validation do

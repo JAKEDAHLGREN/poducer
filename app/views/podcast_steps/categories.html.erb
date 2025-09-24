@@ -6,7 +6,11 @@
     <div class="p-8">
       <div class="field mb-4">
         <%= f.label :primary_category, class: "block text-md font-medium text-black" %>
-        <%= f.text_field :primary_category, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm" %>
+        <%= f.text_field :primary_category, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm #{@podcast.errors[:primary_category].any? ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-orange-500'}" %>
+        <% @podcast.errors.full_messages_for(:primary_category).each do |message| %>
+          <p class="mt-1 text-sm text-red-600"><%= message %></p>
+        <% end %>
+
       </div>
       <div class="field mb-4">
         <%= f.label :secondary_category, class: "block text-md font-medium text-black" %>
