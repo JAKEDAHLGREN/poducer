@@ -10,5 +10,13 @@
     "propshaft",
     "Sendfile",
     "zoneinfo"
-  ]
+  ],
+  "editor.fontFamily": "OpenDyslexic, Consolas, 'Courier New', monospace",
+  "editor.codeLensFontFamily": "OpenDyslexic, Consolas, 'Courier New', monospace",
+  "debug.console.fontFamily": "OpenDyslexic, Consolas, 'Courier New', monospace",
+  "terminal.integrated.fontFamily": "OpenDyslexic, Consolas, 'Courier New', monospace",
+  "terminal.integrated.letterSpacing": -10,
+  "terminal.integrated.lineHeight": 1,
+  "terminal.integrated.fontSize": 10,
+  "editor.wordWrap": "on"
 }
