@@ -62,4 +62,18 @@ class Identity::PasswordResetsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_identity_password_reset_url
     assert_equal "That password reset link is invalid", flash[:alert]
   end
+
+  test "should not update password with confirmation mismatch" do
+    sid = @user.generate_token_for(:password_reset)
+
+    patch identity_password_reset_url, params: { sid: sid, password: "Secret6*4*2*", password_confirmation: "Mismatch6*4*2*" }
+    assert_response :unprocessable_entity
+  end
+
+  test "should not update password with invalid token" do
+    patch identity_password_reset_url, params: { sid: "bogus", password: "Secret6*4*2*", password_confirmation: "Secret6*4*2*" }
+
+    assert_redirected_to new_identity_password_reset_url
+    assert_equal "That password reset link is invalid", flash[:alert]
+  end
 end

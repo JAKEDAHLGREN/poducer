@@ -19,6 +19,8 @@ class Identity::EmailVerificationsControllerTest < ActionDispatch::IntegrationTe
 
     get identity_email_verification_url(sid: sid, email: @user.email)
     assert_redirected_to root_url
+
+    assert @user.reload.verified?
   end
 
   test "should not verify email with expired token" do
@@ -27,6 +29,13 @@ class Identity::EmailVerificationsControllerTest < ActionDispatch::IntegrationTe
     travel 3.days
 
     get identity_email_verification_url(sid: sid, email: @user.email)
+
+    assert_redirected_to edit_identity_email_url
+    assert_equal "That email verification link is invalid", flash[:alert]
+  end
+
+  test "should not verify email with invalid token" do
+    get identity_email_verification_url(sid: "bogus-token", email: @user.email)
 
     assert_redirected_to edit_identity_email_url
     assert_equal "That email verification link is invalid", flash[:alert]

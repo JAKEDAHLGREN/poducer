@@ -11,8 +11,11 @@ class Identity::EmailsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update email" do
-    patch identity_email_url, params: { email: "new_email@hey.com", password_challenge: "Secret1*3*5*" }
+    assert_enqueued_email_with UserMailer, :email_verification, params: { user: @user } do
+      patch identity_email_url, params: { email: "new_email@hey.com", password_challenge: "Secret1*3*5*" }
+    end
     assert_redirected_to root_url
+    assert_equal "Your email has been changed", flash[:notice]
   end
 
 
@@ -21,5 +24,13 @@ class Identity::EmailsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
     assert_select "li", /Password challenge is invalid/
+  end
+
+  test "should not enqueue email when email unchanged" do
+    user = users(:lazaro_nixon)
+    assert_no_enqueued_emails do
+      patch identity_email_url, params: { email: user.email, password_challenge: "Secret1*3*5*" }
+    end
+    assert_redirected_to root_url
   end
 end

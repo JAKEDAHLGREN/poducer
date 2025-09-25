@@ -4,7 +4,7 @@ one:
   user: one
   name: MyString
   description: MyText
-  website_url: MyString
+  website_url: https://example.com
   primary_category: MyString
   secondary_category: MyString
   tertiary_category: MyString
@@ -14,7 +14,7 @@ two:
   user: two
   name: MyString
   description: MyText
-  website_url: MyString
+  website_url: https://example.com
   primary_category: MyString
   secondary_category: MyString
   tertiary_category: MyString

@@ -5,6 +5,11 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     @user = users(:lazaro_nixon)
   end
 
+  test "should redirect index when not signed in" do
+    get sessions_url
+    assert_redirected_to sign_in_url
+  end
+
   test "should get index" do
     sign_in_as @user
 
@@ -18,15 +23,21 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should sign in" do
-    post sign_in_url, params: { email: @user.email, password: "Secret1*3*5*" }
+    assert_difference("Session.count", 1) do
+      post sign_in_url, params: { email: @user.email, password: "Secret1*3*5*" }
+    end
     assert_redirected_to root_url
 
-    get root_url
+    # root redirects to the appropriate landing page; follow through to a 200
+    follow_redirect! # GET "/"
+    follow_redirect! # GET "/podcasts" or "/producer/episodes"
     assert_response :success
   end
 
   test "should not sign in with wrong credentials" do
-    post sign_in_url, params: { email: @user.email, password: "SecretWrong1*3" }
+    assert_no_difference("Session.count") do
+      post sign_in_url, params: { email: @user.email, password: "SecretWrong1*3" }
+    end
     assert_redirected_to sign_in_url(email_hint: @user.email)
     assert_equal "That email or password is incorrect", flash[:alert]
 
@@ -34,13 +45,21 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to sign_in_url
   end
 
-  test "should sign out" do
+  test "should sign out by destroying a specific session" do
     sign_in_as @user
 
     delete session_url(@user.sessions.last)
     assert_redirected_to sessions_url
 
     follow_redirect!
+    assert_redirected_to sign_in_url
+  end
+
+  test "should sign out current session" do
+    sign_in_as @user
+    assert_difference("Session.count", -1) do
+      delete sign_out_url
+    end
     assert_redirected_to sign_in_url
   end
 end
