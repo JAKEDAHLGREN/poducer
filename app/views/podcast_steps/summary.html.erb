@@ -60,7 +60,7 @@
             <!-- Media Files -->
             <div class="field">
               <%= f.label :media, "Media Files", class: "block text-sm font-medium text-black mb-3" %>
-              
+
               <!-- Drag and Drop Zone -->
               <div
                 class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors mb-4"
@@ -90,7 +90,7 @@
                   type="button"
                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
                   data-action="click->media-upload#openFileDialog"
-                >
+                  >
                   Select Files
                 </button>
               </div>
@@ -99,7 +99,7 @@
               <% if @podcast.media.any? %>
                 <div class="mb-3">
                   <p class="text-sm text-gray-900 mb-2"><%= pluralize(@podcast.media.count, 'file') %> currently uploaded</p>
-                  
+
                   <div class="space-y-2 max-h-48 overflow-y-auto">
                     <% @podcast.media.each do |media_file| %>
                       <div class="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg group">
@@ -124,7 +124,7 @@
                           data-action="click->media-upload#removeExistingFile"
                           data-file-id="<%= media_file.id %>"
                           title="Remove file"
-                        >
+                          >
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                           </svg>
