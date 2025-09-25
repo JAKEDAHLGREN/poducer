@@ -22,6 +22,6 @@ class Producer::EpisodesControllerTest < ActionDispatch::IntegrationTest
 
     patch complete_editing_producer_episode_url(@episode)
     assert_redirected_to producer_episodes_url
-    assert_equal "episode_complete", @episode.reload.status
+    assert_equal "awaiting_user_review", @episode.reload.status
   end
 end

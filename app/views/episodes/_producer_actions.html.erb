@@ -1,0 +1,20 @@
+<% episode = local_assigns[:episode] %>
+<% use_ns = local_assigns[:use_producer_namespace] %>
+
+<% start_path    = use_ns ? start_editing_producer_episode_path(episode) : start_editing_podcast_episode_path(episode.podcast, episode) %>
+<% complete_path = use_ns ? complete_editing_producer_episode_path(episode) : complete_editing_podcast_episode_path(episode.podcast, episode) %>
+<% publish_path  = publish_episode_podcast_episode_path(episode.podcast, episode) %>
+
+<% if episode.edit_requested? %>
+  <%= button_to start_path, method: :patch, class: "w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200", form: { class: "w-full" } do %>
+    Start Editing
+  <% end %>
+<% elsif episode.editing? %>
+  <%= button_to complete_path, method: :patch, class: "w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200", form: { class: "w-full" } do %>
+    Submit Edited Episode
+  <% end %>
+<% elsif episode.ready_to_publish? %>
+  <%= button_to publish_path, method: :patch, class: "w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200", form: { class: "w-full" } do %>
+    Publish Episode
+  <% end %>
+<% end %>

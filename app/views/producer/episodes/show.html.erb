@@ -1,4 +1,5 @@
 <div class="min-h-screen rounded-lg px-2 py-8">
+  <%= turbo_stream_from @episode %>
   <div class="max-w-7xl px-4 sm:px-6 lg:px-8">
     <%# Back Navigation %>
     <div class="mb-6">
@@ -24,16 +25,9 @@
           <div class="flex items-center justify-between">
             <h2 class="text-xl font-semibold text-gray-900 mb-4">Episode Information</h2>
             <div class="flex items-center space-x-4">
-              <% case @episode.status %>
-              <% when "edit_requested" %>
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                  Edit Requested
-                </span>
-              <% when "editing" %>
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                  Currently Editing
-                </span>
-              <% end %>
+              <div id="<%= dom_id(@episode, :status) %>">
+                <%= render "episodes/status_badge", episode: @episode %>
+              </div>
             </div>
           </div>
           <div class="space-y-4">
@@ -124,8 +118,7 @@
                 class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm" %>
           </div>
           <div>
-            <%= form.submit "Update Notes",
-                class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700" %>
+            <%= form.submit "Update Notes", class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700" %>
           </div>
         <% end %>
       </div>
@@ -134,15 +127,13 @@
       <div class="mt-8 pt-6 border-t border-gray-200">
           <div class="flex items-center justify-end space-x-4">
             <% if @episode.edit_requested? %>
-              <%= button_to "Start Editing",
-                  start_editing_producer_episode_path(@episode),
-                  method: :patch,
-                  class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500" %>
-            <% elsif @episode.editing? %>
-              <%= button_to "Complete Editing",
-                  complete_editing_producer_episode_path(@episode),
-                  method: :patch,
-                  class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>
+              <div id="<%= dom_id(@episode, :producer_actions) %>" class="w-full">
+                <%= render "episodes/producer_actions", episode: @episode %>
+              </div>
+            <% elsif @episode.editing? || @episode.ready_to_publish? %>
+              <div id="<%= dom_id(@episode, :producer_actions) %>" class="w-full">
+                <%= render "episodes/producer_actions", episode: @episode, use_producer_namespace: true %>
+              </div>
             <% end %>
           </div>
         </div>

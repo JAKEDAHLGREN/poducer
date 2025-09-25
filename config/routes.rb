@@ -22,6 +22,8 @@ Rails.application.routes.draw do
         patch :submit_episode
         patch :start_editing
         patch :complete_editing
+        patch :re_submit_for_editing
+        patch :approve_episode
         patch :publish_episode
         patch :revert_to_draft
       end

@@ -3,14 +3,12 @@ class Producer::EpisodesController < ApplicationController
   before_action :set_episode, only: [ :show, :start_editing, :complete_editing, :update ]
 
   def index
-    # Show all episodes that need producer attention
-    @episodes = Episode.includes(:podcast, podcast: :user)
-                      .where(status: [ :edit_requested, :editing ])
-                      .order(created_at: :desc)
+    @episodes = Episode.includes(:podcast, podcast: :user).where(status: [ :edit_requested, :editing, :awaiting_user_review, :ready_to_publish ]).order(updated_at: :desc)
 
-    # Group by status for better organization
-    @edit_requested_episodes = @episodes.select { |ep| ep.status == "edit_requested" }
-    @editing_episodes = @episodes.select { |ep| ep.status == "editing" }
+    @edit_requested_episodes = @episodes.select(&:edit_requested?)
+    @editing_episodes = @episodes.select(&:editing?)
+    @awaiting_user_review_episodes = @episodes.select(&:awaiting_user_review?)
+    @ready_to_publish_episodes = @episodes.select(&:ready_to_publish?)
   end
 
   def show

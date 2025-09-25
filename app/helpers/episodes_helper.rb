@@ -4,6 +4,8 @@ module EpisodesHelper
       "draft" => { text: "Draft", bg: "bg-gray-100", text_color: "text-gray-800" },
       "edit_requested" => { text: "Edit Requested", bg: "bg-blue-100", text_color: "text-blue-800" },
       "editing" => { text: "Editing", bg: "bg-yellow-100", text_color: "text-yellow-800" },
+      "awaiting_user_review" => { text: "Awaiting Your Review", bg: "bg-purple-100", text_color: "text-purple-800" },
+      "ready_to_publish" => { text: "Ready to Publish", bg: "bg-green-100", text_color: "text-green-800" },
       "episode_complete" => { text: "Episode Complete", bg: "bg-green-100", text_color: "text-green-800" },
       "archived" => { text: "Archived", bg: "bg-red-100", text_color: "text-red-800" }
     }

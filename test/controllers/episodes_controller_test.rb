@@ -54,7 +54,7 @@ class EpisodesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to podcast_episodes_url(@podcast)
   end
 
-  test "submit, start editing, complete editing, revert" do
+   test "submit, start editing, complete editing, approve, publish, revert" do
     patch submit_episode_podcast_episode_url(@podcast, @episode)
     assert_redirected_to podcast_episode_url(@podcast, @episode)
     assert_equal "edit_requested", @episode.reload.status
@@ -65,6 +65,14 @@ class EpisodesControllerTest < ActionDispatch::IntegrationTest
 
     patch complete_editing_podcast_episode_url(@podcast, @episode)
     assert_redirected_to podcast_episode_url(@podcast, @episode)
+    assert_equal "awaiting_user_review", @episode.reload.status
+
+    patch approve_episode_podcast_episode_url(@podcast, @episode)
+    assert_redirected_to podcast_episode_url(@podcast, @episode)
+    assert_equal "ready_to_publish", @episode.reload.status
+
+    patch publish_episode_podcast_episode_url(@podcast, @episode)
+    assert_redirected_to podcast_episode_url(@podcast, @episode)
     assert_equal "episode_complete", @episode.reload.status
 
     # revert only allowed from edit_requested; set and then revert
@@ -72,5 +80,18 @@ class EpisodesControllerTest < ActionDispatch::IntegrationTest
     patch revert_to_draft_podcast_episode_url(@podcast, @episode)
     assert_redirected_to podcast_episode_url(@podcast, @episode)
     assert_equal "draft", @episode.reload.status
+  end
+
+  test "re_submit sends episode back to edit_requested" do
+    # Move to awaiting_user_review
+    patch submit_episode_podcast_episode_url(@podcast, @episode)
+    patch start_editing_podcast_episode_url(@podcast, @episode)
+    patch complete_editing_podcast_episode_url(@podcast, @episode)
+    assert_equal "awaiting_user_review", @episode.reload.status
+
+    # Re-submit for more edits
+    patch re_submit_for_editing_podcast_episode_url(@podcast, @episode)
+    assert_redirected_to podcast_episode_url(@podcast, @episode)
+    assert_equal "edit_requested", @episode.reload.status
   end
 end

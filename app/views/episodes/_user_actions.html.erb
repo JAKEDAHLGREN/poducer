@@ -1,0 +1,36 @@
+<% episode = local_assigns[:episode] %>
+
+<% if episode.can_be_submitted_by_user? %>
+  <%= button_to submit_episode_podcast_episode_path(episode.podcast, episode), method: :patch, class: "w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200", form: { class: "w-full" } do %>
+    <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+    </svg>
+    Submit for Editing
+  <% end %>
+<% end %>
+
+<% if episode.edit_requested? %>
+  <%= button_to revert_to_draft_podcast_episode_path(episode.podcast, episode), method: :patch, class: "w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200", form: { class: "w-full" } do %>
+    <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+    </svg>
+    Revert Episode Status to Draft
+  <% end %>
+<% end %>
+
+<% if episode.editing? %>
+  <h1 class="text-black text-center text-xl font-bold">Editing is in Progress</h1>
+  <p class="text-black text-center text-sm">A producer is currently editing this episode. Please check back later to review the changes.</p>
+<% end %>
+
+<% if episode.awaiting_user_review? %>
+  <div class="flex flex-row space-x-2">
+    <%= button_to re_submit_for_editing_podcast_episode_path(episode.podcast, episode), method: :patch, class: "w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200", form: { class: "w-full" } do %>
+      Re-Submit for Editing
+    <% end %>
+
+    <%= button_to approve_episode_podcast_episode_path(episode.podcast, episode), method: :patch, class: "w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200", form: { class: "w-full" } do %>
+      Approve Episode
+    <% end %>
+  </div>
+<% end %>

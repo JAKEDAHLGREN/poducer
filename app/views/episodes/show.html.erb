@@ -1,4 +1,5 @@
 <div class="min-h-screen rounded-lg px-2 py-8">
+  <%= turbo_stream_from @episode %>
   <div class="max-w-7xl px-4 sm:px-6 lg:px-8">
     <!-- Back Navigation -->
     <div class="flex justify-between items-center mb-6">
@@ -43,7 +44,9 @@
 
         <!-- Status Badge -->
         <div class="absolute top-4 right-4">
-          <%= episode_status_badge(@episode.status) %>
+          <div id="<%= dom_id(@episode, :status) %>">
+            <%= render "episodes/status_badge", episode: @episode %>
+          </div>
         </div>
 
         <!-- Episode Number Badge -->
@@ -209,51 +212,13 @@
           <% end %>
 
           <% if Current.user.user? %>
-            <!-- User actions -->
-            <% if @episode.can_be_submitted_by_user? %>
-              <%= button_to submit_episode_podcast_episode_path(@podcast, @episode), method: :patch, class: "w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200", form: { class: "w-full" } do %>
-                <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-                </svg>
-                Submit for Editing
-              <% end %>
-            <% end %>
-
-            <% if @episode.edit_requested? %>
-              <%= button_to revert_to_draft_podcast_episode_path(@podcast, @episode), method: :patch, class: "w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200", form: { class: "w-full" } do %>
-                <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-                </svg>
-                Revert Episode Status to Draft
-              <% end %>
-            <% end %>
-
-            <% if @episode.is_complete? %>
-              <%= button_to publish_episode_podcast_episode_path(@podcast, @episode), method: :patch, class: "w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200", form: { class: "w-full" } do %>
-                <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-                </svg>
-                Publish Episode
-              <% end %>
-            <% end %>
+            <div id="<%= dom_id(@episode, :user_actions) %>" class="w-full">
+              <%= render "episodes/user_actions", episode: @episode %>
+            </div>
           <% elsif Current.user.producer? %>
-            <!-- Producer actions -->
-            <% if @episode.edit_requested? %>
-              <%= button_to start_editing_podcast_episode_path(@podcast, @episode), method: :patch, class: "w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200", form: { class: "w-full" } do %>
-                <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-                </svg>
-                Start Editing
-              <% end %>
-
-            <% elsif @episode.is_editing_in_progress? %>
-              <%= button_to complete_editing_podcast_episode_path(@podcast, @episode), method: :patch, class: "w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200", form: { class: "w-full" } do %>
-                <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-                </svg>
-                Complete Editing
-              <% end %>
-            <% end %>
+            <div id="<%= dom_id(@episode, :producer_actions) %>" class="w-full">
+              <%= render "episodes/producer_actions", episode: @episode %>
+            </div>
           <% end %>
         </div>
       </div>

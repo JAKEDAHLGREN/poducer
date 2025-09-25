@@ -1,7 +1,7 @@
 class EpisodesController < ApplicationController
   before_action :set_podcast
-  before_action :set_episode, only: [ :show, :edit, :update, :destroy, :submit_episode, :start_editing, :complete_editing, :publish_episode, :revert_to_draft ]
-  before_action -> { authorize_resource_access(@episode) }, only: [ :show, :edit, :update, :destroy, :submit_episode, :start_editing, :complete_editing, :publish_episode, :revert_to_draft ]
+  before_action :set_episode, only: [ :show, :edit, :update, :destroy, :submit_episode, :start_editing, :complete_editing, :revert_to_draft, :re_submit_for_editing, :approve_episode, :publish_episode ]
+  before_action -> { authorize_resource_access(@episode) }, only: [ :show, :edit, :update, :destroy, :submit_episode, :start_editing, :complete_editing, :revert_to_draft, :re_submit_for_editing, :approve_episode, :publish_episode ]
   before_action :authorize_editing, only: [ :edit, :update ]
 
   def index
@@ -75,19 +75,35 @@ class EpisodesController < ApplicationController
 
   def complete_editing
     if @episode.complete_editing!
-      redirect_to podcast_episode_path(@podcast, @episode), notice: "Episode editing completed."
+      redirect_to podcast_episode_path(@podcast, @episode), notice: "Submitted edited episode for user review."
     else
-      redirect_to podcast_episode_path(@podcast, @episode), alert: "Unable to complete episode editing."
+      redirect_to podcast_episode_path(@podcast, @episode), alert: "Unable to submit edited episode."
     end
   end
 
-  def publish_episode
-    if @episode.update(status: :episode_complete) # Use the correct status
-      redirect_to podcast_episode_path(@podcast, @episode), notice: "Episode published successfully."
+  def re_submit_for_editing
+    if @episode.re_submit_for_editing!
+      redirect_to podcast_episode_path(@podcast, @episode), notice: "Episode has been re-submitted for editing."
     else
-      redirect_to podcast_episode_path(@podcast, @episode), alert: "Unable to publish episode."
+      redirect_to podcast_episode_path(@podcast, @episode), alert: "Unable to re-submit episode for editing."
     end
   end
+
+  def approve_episode
+    if @episode.approve_episode!
+      redirect_to podcast_episode_path(@podcast, @episode), notice: "Approved. Producer can now publish."
+    else
+      redirect_to podcast_episode_path(@podcast, @episode), alert: "Unable to approve episode."
+    end
+  end
+
+def publish_episode
+  if @episode.publish!
+    redirect_to podcast_episode_path(@podcast, @episode), notice: "Episode published."
+  else
+    redirect_to podcast_episode_path(@podcast, @episode), alert: "Unable to publish episode."
+  end
+end
 
   private
 
