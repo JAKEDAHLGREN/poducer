@@ -21,13 +21,13 @@
       <% end %>
     </div>
 
-    <% if @episode.persisted? && @episode.published? %>
+    <% if @episode.persisted? && @episode.is_complete? %>
       <%= render "shared/page_heading", title: "EDIT EPISODE", description: "Update your episode information and settings" %>
     <% else %>
       <%= render "shared/page_heading", title: "EPISODE DETAILS", description: "Start by providing basic information" %>
     <% end %>
 
-    <%= form_for( @episode, url: episode_wizard_path, method: :patch, data: {turbo: false}) do |f| %>
+    <%= form_for( @episode, url: podcast_episode_wizard_path, method: :patch, data: {turbo: false}) do |f| %>
       <%= yield f %>
     <% end %>
   </div>

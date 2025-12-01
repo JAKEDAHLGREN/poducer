@@ -18,6 +18,11 @@ Rails.application.routes.draw do
     end
 
     resources :episodes do
+      collection do
+        post :start_wizard
+      end
+
+      resources :wizard, only: [ :show, :update ], controller: "episode_steps"
       member do
         patch :submit_episode
         patch :start_editing

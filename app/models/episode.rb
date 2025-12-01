@@ -1,4 +1,14 @@
 class Episode < ApplicationRecord
+  FORMAT_OPTIONS = [
+    "Interview",
+    "Solo",
+    "Panel Discussion",
+    "Storytelling",
+    "News/Current Events",
+    "Educational",
+    "Entertainment",
+    "Other"
+  ].freeze
   belongs_to :podcast
   # Updated enum to track the new status flow
   enum :status, {
@@ -17,8 +27,10 @@ class Episode < ApplicationRecord
   has_one_attached  :cover_art
   has_many_attached :assets
 
-  validates :name, :description, :release_date, presence: true
-  validates :number, presence: true, numericality: { only_integer: true, greater_than: 0 }
+  # Wizard step validations
+  validates :name, :description, presence: true, on: :overview_step
+  validates :number, presence: true, numericality: { only_integer: true, greater_than: 0 }, on: :overview_step
+  validates :release_date, presence: true, on: :details_step
 
   # Status transition methods
   def submit_for_editing!

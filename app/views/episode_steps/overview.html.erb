@@ -1,54 +1,42 @@
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div class="col-span-2 md:col-span-1">
-      <%= form.label :name, "Episode Title", class: "block text-sm font-medium text-gray-700 mb-2" %>
-      <%= form.text_field :name, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500", placeholder: "Enter episode title" %>
+<%= render 'form', locals: { step: step, steps: @steps } do |f| %>
+  <%= render "podcast_steps/progress_bar", wizard_steps: @steps %>
 
-      <% if @episode.errors[:name].any? %>
-        <p class="mt-1 text-sm text-red-600">
-          <%= @episode.errors[:name].join(", ") %>
-        </p>
-      <% end %>
-    </div>
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden p-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="col-span-2 md:col-span-1">
+        <%= f.label :name, "Episode Title", class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= f.text_field :name, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500", placeholder: "Enter episode title" %>
 
-    <div>
-      <%= form.label :number, "Episode Number", class: "block text-sm font-medium text-gray-700 mb-2" %>
-      <%= form.number_field :number, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500", placeholder: "1" %>
+        <% if @episode.errors[:name].any? %>
+          <p class="mt-1 text-sm text-red-600">
+            <%= @episode.errors[:name].join(", ") %>
+          </p>
+        <% end %>
+      </div>
 
-      <% if @episode.errors[:number].any? %>
-        <p class="mt-1 text-sm text-red-600">
-          <%= @episode.errors[:number].join(", ") %>
-        </p>
-      <% end %>
-    </div>
+      <div>
+        <%= f.label :number, "Episode Number", class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= f.number_field :number, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500", placeholder: "1" %>
 
-    <div class="mt-6">
-      <%= form.label :description, "Episode Description", class: "block text-sm font-medium text-gray-700 mb-2" %>
-      <%= form.text_area :description, rows: 4, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500", placeholder: "Describe what this episode is about..." %>
+        <% if @episode.errors[:number].any? %>
+          <p class="mt-1 text-sm text-red-600">
+            <%= @episode.errors[:number].join(", ") %>
+          </p>
+        <% end %>
+      </div>
 
-      <% if @episode.errors[:description].any? %>
-        <p class="mt-1 text-sm text-red-600">
-          <%= @episode.errors[:description].join(", ") %>
-        </p>
-      <% end %>
-    </div>
+      <div class="mt-6">
+        <%= f.label :description, "Episode Description", class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= f.text_area :description, rows: 4, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500", placeholder: "Describe what this episode is about..." %>
 
-    <div>
-      <%= form.label :format, "Episode Format", class: "block text-sm font-medium text-gray-700 mb-2" %>
-
-      <%= form.select :format,
-            options_for_select([
-              ['Interview', 'Interview'],
-              ['Solo', 'Solo'],
-              ['Panel Discussion', 'Panel Discussion'],
-              ['Storytelling', 'Storytelling'],
-              ['News/Current Events', 'News/Current Events'],
-              ['Educational', 'Educational'],
-              ['Entertainment', 'Entertainment'],
-              ['Other', 'Other']
-            ], @episode.format),
-            { prompt: 'Select format' },
-            { class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" } %>
+        <% if @episode.errors[:description].any? %>
+          <p class="mt-1 text-sm text-red-600">
+            <%= @episode.errors[:description].join(", ") %>
+          </p>
+        <% end %>
+      </div>
     </div>
   </div>
-</div>
+
+  <%= render "episode_steps/pagination", f: f, step: step %>
+<% end %>

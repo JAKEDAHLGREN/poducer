@@ -8,6 +8,17 @@ class EpisodesController < ApplicationController
     @episodes = Current.user.admin? ? @podcast.episodes : @podcast.episodes.where(user: Current.user)
   end
 
+  def start_wizard
+    next_number = (@podcast.episodes.maximum(:number) || 0) + 1
+    @episode = @podcast.episodes.build(
+      status: :draft,
+      name: "",
+      number: next_number
+    )
+    @episode.save!(validate: false)
+    redirect_to podcast_episode_wizard_path(@podcast.id, @episode.id, :overview), notice: "Started creating your episode."
+  end
+
   def new
     @episode = @podcast.episodes.build
   end

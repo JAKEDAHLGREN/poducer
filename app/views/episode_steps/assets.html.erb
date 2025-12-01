@@ -1,0 +1,150 @@
+<%= render 'form', locals: { step: step, steps: @steps } do |f| %>
+  <%= render "podcast_steps/progress_bar", wizard_steps: @steps %>
+
+  <div
+    class="
+      bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden
+      p-6 space-y-8
+    "
+  >
+    <!-- Cover Art -->
+    <div>
+      <h3 class="text-lg font-medium text-gray-900 mb-3">Cover Art</h3>
+
+      <div class="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-300">
+        <% if @episode.persisted? && @episode.cover_art.attached? %>
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center">
+              <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden mr-3">
+                <%= image_tag @episode.cover_art, class: "w-full h-full object-cover" %>
+              </div>
+
+              <span class="text-sm font-medium text-gray-900">
+                <%= @episode.cover_art.filename %>
+              </span>
+            </div>
+
+            <%= link_to "Download", rails_blob_path(@episode.cover_art, disposition: "attachment"), class: "text-orange-600 hover:text-orange-700 text-sm font-medium" %>
+          </div>
+        <% elsif @podcast.cover_art.attached? %>
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center">
+              <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden mr-3">
+                <%= image_tag @podcast.cover_art, class: "w-full h-full object-cover" %>
+              </div>
+
+              <div>
+                <span class="text-sm font-medium text-gray-900">
+                  Using podcast cover art
+                </span>
+
+                <p class="text-xs text-gray-500">
+                  No episode cover uploaded. The podcast cover will be used.
+                </p>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <%= f.file_field :cover_art, accept: "image/*", class: "w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" %>
+
+        <% if @episode.errors[:cover_art].any? %>
+          <p class="mt-2 text-sm text-red-600">
+            <%= @episode.errors[:cover_art].first %>
+          </p>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Raw Audio -->
+    <div>
+      <h3 class="text-lg font-medium text-gray-900 mb-3">Raw Audio</h3>
+
+      <div class="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-300">
+        <% if @episode.persisted? && @episode.raw_audio.attached? %>
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center">
+              <svg
+                class="w-8 h-8 text-green-500 mr-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                ></path>
+              </svg>
+
+              <span class="text-sm font-medium text-gray-900">
+                <%= @episode.raw_audio.filename %>
+              </span>
+            </div>
+
+            <%= link_to "Download", rails_blob_path(@episode.raw_audio, disposition: "attachment"), class: "text-orange-600 hover:text-orange-700 text-sm font-medium" %>
+          </div>
+        <% end %>
+
+        <%= f.file_field :raw_audio, accept: "audio/*", class: "w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" %>
+      </div>
+    </div>
+
+    <!-- Additional Assets -->
+    <div>
+      <h3 class="text-lg font-medium text-gray-900 mb-3">Additional Assets</h3>
+
+      <div class="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-300">
+        <% if @episode.persisted? && @episode.assets.attached? %>
+          <div class="mb-3">
+            <h4 class="text-sm font-medium text-gray-900 mb-2">
+              Current Assets (<%= @episode.assets.count %>)
+            </h4>
+
+            <div class="space-y-2">
+              <% @episode.assets.each do |asset| %>
+                <div
+                  class="
+                    flex items-center justify-between bg-white p-2 rounded
+                    border
+                  "
+                >
+                  <div class="flex items-center">
+                    <svg
+                      class="w-5 h-5 text-gray-500 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                      ></path>
+                    </svg>
+
+                    <span class="text-sm text-gray-600">
+                      <%= asset.filename %>
+                    </span>
+                  </div>
+
+                  <%= link_to "Download", rails_blob_path(asset, disposition: "attachment"), class: "text-orange-600 hover:text-orange-700 text-sm font-medium" %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <%= f.file_field :assets, multiple: true, class: "w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" %>
+
+        <p class="mt-2 text-xs text-gray-500">
+          Upload additional files like show notes, transcripts, or images
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <%= render "episode_steps/pagination", f: f, step: step %>
+<% end %>

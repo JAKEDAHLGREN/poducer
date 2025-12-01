@@ -30,12 +30,13 @@
           <div class="flex items-center justify-center h-full">
             <% if @episode.cover_art.attached? %>
               <%= image_tag @episode.cover_art, class: "w-full h-full object-cover" %>
+            <% elsif @podcast.cover_art.attached? %>
+              <%= image_tag @podcast.cover_art, class: "w-full h-full object-cover" %>
             <% else %>
               <div class="text-center">
                 <svg class="w-24 h-24 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
                 </svg>
-
                 <h2 class="text-2xl font-bold text-blue-500">Episode <%= @episode.number %></h2>
               </div>
             <% end %>
