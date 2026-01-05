@@ -2,7 +2,7 @@
 
 <%= render 'form', locals: { step: step, steps: @steps } do |f| %>
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-    <div class="p-8" data-controller="media-upload" data-media-upload-podcast-id-value="<%= @podcast.id %>">
+    <div class="p-8">
       <%= render "podcast_steps/progress_bar", wizard_steps: @steps %>
       <% if @podcast.persisted? && @podcast.published? %>
         <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
@@ -31,6 +31,24 @@
               <%= f.label :description, class: "block text-sm font-medium text-black" %>
               <%= f.text_area :description, rows: 4, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
             </div>
+
+            <div class="field">
+              <%= f.label :episode_type, class: "block text-sm font-medium text-black" %>
+              <%= f.select :episode_type, options_for_select(episode_type_options, @podcast.episode_type), { include_blank: "Please select a type" }, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
+            </div>
+
+            <div class="field">
+              <%= f.label :explicit, class: "block text-sm font-medium text-black" %>
+              <label class="inline-flex items-center space-x-2 mt-2">
+                <%= f.check_box :explicit, {}, true, false %>
+                <span class="text-sm text-gray-700">Explicit content</span>
+              </label>
+            </div>
+
+            <div class="field">
+              <%= f.label :website_url, class: "block text-sm font-medium text-black" %>
+              <%= f.text_field :website_url, placeholder: "Optional", class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
+            </div>
           </div>
         </div>
 
@@ -53,94 +71,11 @@
                   </div>
                 </div>
               <% end %>
-              <%= f.file_field :cover_art, class: "w-full mt-2 text-sm text-gray-500 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-600 file:text-white hover:file:bg-orange-700" %>
-              <p class="mt-1 text-xs text-gray-500">Upload a new image to replace the current cover art</p>
+              <%= f.file_field :cover_art, direct_upload: true, accept: "image/png,image/jpeg,image/webp", class: "w-full mt-2 text-sm text-gray-500 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-600 file:text-white hover:file:bg-orange-700" %>
+              <p class="mt-1 text-xs text-gray-500">Upload a new PNG, JPG, or WEBP image up to 5 MB to replace the current cover art.</p>
             </div>
-
-            <!-- Media Files -->
-            <div class="field">
-              <%= f.label :media, "Media Files", class: "block text-sm font-medium text-black mb-3" %>
-
-              <!-- Drag and Drop Zone -->
-              <div
-                class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors mb-4"
-                data-media-upload-target="dropZone"
-              >
-                <!-- Upload Icon -->
-                <div class="mb-2">
-                  <svg class="mx-auto h-8 w-8 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
-                </div>
-
-                <!-- Upload Text -->
-                <p class="text-gray-600 text-sm mb-2">Drag & Drop files or</p>
-
-                <!-- File Input (Hidden) -->
-                <%= f.file_field :media,
-                    multiple: true,
-                    class: "hidden",
-                    data: {
-                      media_upload_target: "input",
-                      action: "change->media-upload#fileSelected"
-                    } %>
-
-                <!-- Select Files Button -->
-                <button
-                  type="button"
-                  class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-                  data-action="click->media-upload#openFileDialog"
-                  >
-                  Select Files
-                </button>
-              </div>
-
-              <!-- Current Media Files List -->
-              <% if @podcast.media.any? %>
-                <div class="mb-3">
-                  <p class="text-sm text-gray-900 mb-2"><%= pluralize(@podcast.media.count, 'file') %> currently uploaded</p>
-
-                  <div class="space-y-2 max-h-48 overflow-y-auto">
-                    <% @podcast.media.each do |media_file| %>
-                      <div class="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg group">
-                        <div class="flex items-center">
-                          <!-- File Type Icon -->
-                          <div class="flex-shrink-0 mr-3">
-                            <div class="w-8 h-8 bg-blue-500 rounded flex items-center justify-center">
-                              <span class="text-white text-xs font-bold"><%= media_file.filename.extension.upcase if media_file.filename.extension %></span>
-                            </div>
-                          </div>
-                          <!-- File Name and Size -->
-                          <div>
-                            <p class="text-sm font-medium text-gray-900"><%= truncate(media_file.filename.to_s, length: 30) %></p>
-                            <p class="text-xs text-gray-500"><%= number_to_human_size(media_file.byte_size) %></p>
-                          </div>
-                        </div>
-
-                        <!-- Remove Button -->
-                        <button
-                          type="button"
-                          class="flex-shrink-0 w-6 h-6 text-gray-400 hover:text-red-500 transition-colors"
-                          data-action="click->media-upload#removeExistingFile"
-                          data-file-id="<%= media_file.id %>"
-                          title="Remove file"
-                          >
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                          </svg>
-                        </button>
-                      </div>
-                    <% end %>
-                  </div>
-                </div>
-              <% else %>
-                <div class="mb-3">
-                  <p class="text-sm text-gray-500 italic">No media files uploaded yet</p>
-                </div>
-              <% end %>
-
-              <p class="text-xs text-gray-500">Upload additional media files (existing files will be kept)</p>
-            </div>
+            <!-- Right column left intentionally empty now that media files are handled on Episodes -->
+            <div></div>
           </div>
         </div>
 
@@ -162,17 +97,17 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="field">
               <%= f.label :primary_category, "Primary Category", class: "block text-sm font-medium text-black" %>
-              <%= f.text_field :primary_category, placeholder: "e.g., Technology", class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
+              <%= f.select :primary_category, options_for_select(Podcast::CATEGORIES.map { |c| [c, c] }, @podcast.primary_category), { prompt: "Select a category" }, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
             </div>
 
             <div class="field">
               <%= f.label :secondary_category, "Secondary Category", class: "block text-sm font-medium text-black" %>
-              <%= f.text_field :secondary_category, placeholder: "e.g., Business (optional)", class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
+              <%= f.select :secondary_category, options_for_select(Podcast::CATEGORIES.map { |c| [c, c] }, @podcast.secondary_category), { include_blank: "(optional)" }, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
             </div>
 
             <div class="field">
               <%= f.label :tertiary_category, "Tertiary Category", class: "block text-sm font-medium text-black" %>
-              <%= f.text_field :tertiary_category, placeholder: "e.g., Education (optional)", class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
+              <%= f.select :tertiary_category, options_for_select(Podcast::CATEGORIES.map { |c| [c, c] }, @podcast.tertiary_category), { include_blank: "(optional)" }, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
             </div>
           </div>
         </div>

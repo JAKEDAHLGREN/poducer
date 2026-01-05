@@ -35,9 +35,6 @@ Rails.application.routes.draw do
     end
 
     resources :wizard, only: [ :show, :update ], controller: "podcast_steps"
-
-    # Simpler route for deleting media files
-    delete "media/:media_id", to: "podcast_steps#destroy_media", as: "delete_media"
   end
 
   resources :dashboards, only: [ :index ]

@@ -15,6 +15,8 @@ class EpisodeStepsController < ApplicationController
   def update
     session.delete(:validation_errors)
 
+    # (reverted) no JSON upload handling here
+
     if params[:episode].present?
       filtered_params = episode_params
 
@@ -27,13 +29,13 @@ class EpisodeStepsController < ApplicationController
     end
 
     valid = case step
-            when :overview
+    when :overview
               @episode.valid?(:overview_step)
-            when :details
+    when :details
               @episode.valid?(:details_step)
-            else
+    else
               true
-            end
+    end
 
     if valid
       if @episode.save(validate: false)
@@ -84,5 +86,3 @@ class EpisodeStepsController < ApplicationController
     redirect_to podcast_episode_path(@podcast, @episode), notice: "Episode created successfully."
   end
 end
-
-

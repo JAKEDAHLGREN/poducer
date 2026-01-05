@@ -5,17 +5,18 @@ import { Controller } from "@hotwired/stimulus"
 // for the podcast media step in the wizard
 export default class extends Controller {
   // Define the HTML elements this controller can target
-  static targets = ["input", "dropZone", "fileList", "emptyState"]
+  static targets = ["input", "dropZone", "fileList", "emptyState", "preview", "hint"]
   // Define values that can be passed from HTML data attributes
-  static values = { podcastId: Number }
+  static values = {
+    podcastId: Number,
+    maxSizeBytes: Number
+  }
 
   /**
    * Called automatically when the controller connects to the DOM
    * Sets up the drag-and-drop functionality
    */
   connect() {
-    console.log("Media upload controller connected successfully!")
-    console.log("Podcast ID:", this.podcastIdValue)
     this.setupDragAndDrop()
   }
 
@@ -86,9 +87,9 @@ export default class extends Controller {
    * @param {Event} e - The drop event containing the files
    */
   handleDrop(e) {
-    const dt = e.dataTransfer  // Get the data transfer object
-    const files = dt.files     // Extract the files from it
-    this.handleFiles(files)    // Process the files
+    const dt = e.dataTransfer
+    const files = dt.files
+    this.handleFiles(files)
   }
 
   /**
@@ -99,9 +100,26 @@ export default class extends Controller {
   async handleFiles(files) {
     if (!files || files.length === 0) return
 
-    // Upload each file individually
-    for (let file of files) {
-      await this.uploadFile(file)
+    if (this.isSingleImageMode()) {
+      const file = files[0]
+      if (!this.isAcceptedType(file)) {
+        alert("Please choose a PNG, JPG, or WEBP image.")
+        return
+      }
+      if (this.maxSizeBytesValue && file.size > this.maxSizeBytesValue) {
+        alert("Image is too large. Max size is 5 MB.")
+        return
+      }
+      const dataTransfer = new DataTransfer()
+      dataTransfer.items.add(file)
+      this.inputTarget.files = dataTransfer.files
+      this.updatePreview(file)
+      this.inputTarget.dispatchEvent(new Event("change"))
+    } else {
+      // Upload each file individually
+      for (let file of files) {
+        await this.uploadFile(file)
+      }
     }
   }
 
@@ -112,8 +130,9 @@ export default class extends Controller {
    */
   fileSelected(event) {
     this.handleFiles(event.target.files)
-    // Clear the input so the same file can be selected again if needed
-    event.target.value = ''
+    if (!this.isSingleImageMode()) {
+      event.target.value = ''
+    }
   }
 
   /**
@@ -122,39 +141,34 @@ export default class extends Controller {
    * @param {File} file - The file to upload
    */
   async uploadFile(file) {
-    console.log("Uploading file:", file.name)
-
-    // Create FormData object to send the file
-    // This mimics a form submission with the file
     const formData = new FormData()
-    formData.append('podcast[media][]', file)  // Rails expects this format
+    formData.append('podcast[media][]', file)
+    const url = `/podcasts/${this.podcastIdValue}/wizard/media`
 
     try {
-      // Send PATCH request to the Rails controller
-      const response = await fetch(`/podcasts/${this.podcastIdValue}/wizard/media`, {
+      const response = await fetch(url, {
         method: 'PATCH',
         body: formData,
         headers: {
           'Accept': 'application/json',
-          // Include CSRF token for Rails security
           'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
         }
       })
 
       if (response.ok) {
-        const result = await response.json()
-        console.log("Upload successful:", result)
-        // Refresh the page to show the newly uploaded file
-        // This ensures the server-side file list is displayed
         window.location.reload()
       } else {
-        console.error("Upload failed:", response.status, response.statusText)
         alert('Upload failed. Please try again.')
       }
     } catch (error) {
       console.error("Upload error:", error)
       alert('Upload failed. Please try again.')
     }
+  }
+
+  isSingleImageMode() {
+    // If there is no fileList target on the page, treat as single-image mode
+    return !this.hasFileListTarget
   }
 
   /**
@@ -169,10 +183,7 @@ export default class extends Controller {
     const fileId = event.currentTarget.dataset.fileId
     console.log("Attempting to delete file with ID:", fileId)
 
-    if (!fileId) {
-      console.error("No file ID found")
-      return
-    }
+    if (!fileId) { console.error("No file ID found"); return }
 
     // Ask for confirmation before deleting
     if (!confirm('Are you sure you want to delete this file?')) {
@@ -199,6 +210,26 @@ export default class extends Controller {
       }
     } catch (error) {
       console.error("Delete error:", error)
+      alert('Failed to delete file. Please try again.')
+    }
+  }
+
+  async deleteByUrl(url) {
+    if (!confirm('Are you sure you want to delete this file?')) return
+    try {
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+          'Accept': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+        }
+      })
+      if (response.ok) {
+        window.location.reload()
+      } else {
+        alert('Failed to delete file. Please try again.')
+      }
+    } catch (e) {
       alert('Failed to delete file. Please try again.')
     }
   }
@@ -258,6 +289,28 @@ export default class extends Controller {
     event.preventDefault()
     if (this.hasInputTarget) {
       this.inputTarget.click()
+    }
+  }
+
+  isAcceptedType(file) {
+    const acceptAttr = this.hasInputTarget ? this.inputTarget.accept : ""
+    if (!acceptAttr) return true
+    const allowed = acceptAttr.split(",").map(t => t.trim().toLowerCase())
+    const type = file.type.toLowerCase()
+    const ext = file.name.split(".").pop()?.toLowerCase()
+    return allowed.includes(type) || (ext && allowed.some(a => a.includes(ext)))
+  }
+
+  updatePreview(file) {
+    if (!this.hasPreviewTarget) return
+    const reader = new FileReader()
+    reader.onload = e => {
+      this.previewTarget.src = e.target.result
+      this.previewTarget.classList.remove("hidden")
+    }
+    reader.readAsDataURL(file)
+    if (this.hasHintTarget) {
+      this.hintTarget.textContent = `${file.name} selected`
     }
   }
 }

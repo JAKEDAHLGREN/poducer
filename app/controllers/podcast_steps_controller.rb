@@ -1,6 +1,6 @@
 class PodcastStepsController < ApplicationController
   include Wicked::Wizard
-  steps :overview, :cover, :media, :website, :categories, :summary
+  steps :overview, :media, :categories, :summary
 
   before_action :set_podcast
   before_action :set_steps
@@ -15,20 +15,9 @@ class PodcastStepsController < ApplicationController
     # Clear any previous errors
     session.delete(:validation_errors)
 
-    # Handle media uploads via AJAX separately
-    if request.format.json? && params[:podcast]&.dig(:media)&.any?(&:present?)
-      return handle_media_upload
-    end
-
     # Only assign attributes if there are podcast params (not on summary step)
     if params[:podcast].present?
-      # Filter out empty media params to prevent deletion of existing files
-      filtered_params = podcast_params
-      if filtered_params[:media]&.all?(&:blank?)
-        filtered_params = filtered_params.except(:media)
-      end
-
-      @podcast.assign_attributes(filtered_params) if filtered_params.present?
+      @podcast.assign_attributes(podcast_params) if podcast_params.present?
       # Manually normalize the website URL before validation
       normalize_website_url
     end
@@ -72,35 +61,7 @@ class PodcastStepsController < ApplicationController
     end
   end
 
-  def destroy_media
-    @podcast = Podcast.find(params[:podcast_id])
-    media_attachment = @podcast.media.find(params[:media_id])
-    media_attachment.purge
-
-    render json: { success: true, message: "File deleted successfully" }
-  rescue ActiveRecord::RecordNotFound
-    render json: { success: false, message: "File not found" }, status: 404
-  end
-
   private
-
-  def handle_media_upload
-    @podcast.media.attach(params[:podcast][:media])
-
-    if @podcast.save
-      total_files = @podcast.media.count
-      render json: {
-        success: true,
-        message: "File uploaded successfully",
-        total_files: total_files
-      }
-    else
-      render json: {
-        success: false,
-        message: "Upload failed: #{@podcast.errors.full_messages.join(', ')}"
-      }, status: 422
-    end
-  end
 
   def set_podcast
     @podcast = Podcast.find(params[:podcast_id])
@@ -111,7 +72,7 @@ class PodcastStepsController < ApplicationController
   end
 
   def podcast_params
-    params.require(:podcast).permit(:name, :description, :website_url, :primary_category, :secondary_category, :tertiary_category, :cover_art, media: [])
+    params.require(:podcast).permit(:name, :description, :website_url, :primary_category, :secondary_category, :tertiary_category, :cover_art, :explicit, :episode_type)
   end
 
   def normalize_website_url

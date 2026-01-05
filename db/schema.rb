@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_22_000648) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_02_000000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -51,6 +51,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_22_000648) do
     t.integer "status", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "revision_notes"
     t.index ["podcast_id", "number"], name: "index_episodes_on_podcast_id_and_number", unique: true
     t.index ["podcast_id"], name: "index_episodes_on_podcast_id"
     t.index ["release_date"], name: "index_episodes_on_release_date"
@@ -68,6 +69,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_22_000648) do
     t.integer "status", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "explicit", default: false, null: false
+    t.text "keywords"
+    t.integer "episode_type", default: 0, null: false
+    t.index ["episode_type"], name: "index_podcasts_on_episode_type"
     t.index ["primary_category"], name: "index_podcasts_on_primary_category"
     t.index ["status"], name: "index_podcasts_on_status"
     t.index ["user_id"], name: "index_podcasts_on_user_id"

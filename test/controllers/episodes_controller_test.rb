@@ -54,6 +54,7 @@ class EpisodesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to podcast_episodes_url(@podcast)
   end
 
+
    test "submit, start editing, complete editing, approve, publish, revert" do
     patch submit_episode_podcast_episode_url(@podcast, @episode)
     assert_redirected_to podcast_episode_url(@podcast, @episode)

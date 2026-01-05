@@ -20,7 +20,7 @@ class PodcastStepsControllerTest < ActionDispatch::IntegrationTest
 
   test "overview success advances to next step" do
     patch podcast_wizard_url(@podcast.id, :overview), params: { podcast: { name: "My Show", description: "Great" } }
-    assert_redirected_to podcast_wizard_url(@podcast.id, :cover)
+    assert_redirected_to podcast_wizard_url(@podcast.id, :media)
   end
 
   test "finish publishes and redirects to index" do
