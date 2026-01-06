@@ -5,7 +5,7 @@ import { Controller } from "@hotwired/stimulus"
 // for the podcast media step in the wizard
 export default class extends Controller {
   // Define the HTML elements this controller can target
-  static targets = ["input", "dropZone", "fileList", "emptyState", "preview", "hint"]
+  static targets = ["input", "dropZone", "fileList", "emptyState", "preview", "hint", "instructions", "fileMeta", "fileName", "fileType", "removeButton", "clearHidden"]
   // Define values that can be passed from HTML data attributes
   static values = {
     podcastId: Number,
@@ -17,41 +17,20 @@ export default class extends Controller {
    * Sets up the drag-and-drop functionality
    */
   connect() {
-    this.setupDragAndDrop()
-  }
-
-  /**
-   * Sets up all the drag-and-drop event listeners
-   * Handles visual feedback and file dropping functionality
-   */
-  setupDragAndDrop() {
-    // Check if the drop zone element exists in the DOM
-    if (!this.hasDropZoneTarget) {
-      console.error("Drop zone target not found!")
-      return
+    // If a preview image is already shown (server-rendered), ensure UI reflects it
+    if (this.hasPreviewTarget && !this.previewTarget.classList.contains("hidden")) {
+      this.hideInstructions()
+      this.showFileMeta()
+      this.showRemoveButton()
+    } else {
+      this.hideRemoveButton()
     }
-
-    // Prevent the browser's default drag behaviors (like opening files)
-    // We need to prevent these on both the drop zone and the document body
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-      this.dropZoneTarget.addEventListener(eventName, this.preventDefaults.bind(this), false)
-      document.body.addEventListener(eventName, this.preventDefaults.bind(this), false)
-    })
-
-    // Add visual feedback when files are dragged over the drop zone
-    // These events make the drop zone highlight when files are dragged over it
-    ['dragenter', 'dragover'].forEach(eventName => {
-      this.dropZoneTarget.addEventListener(eventName, this.highlight.bind(this), false)
-    })
-
-    // Remove visual feedback when files are dragged away or dropped
-    ['dragleave', 'drop'].forEach(eventName => {
-      this.dropZoneTarget.addEventListener(eventName, this.unhighlight.bind(this), false)
-    })
-
-    // Handle the actual file drop event
-    this.dropZoneTarget.addEventListener('drop', this.handleDrop.bind(this), false)
+    if (this.hasRemoveButtonTarget) {
+      this.removeButtonTarget.addEventListener("click", this.removeCover.bind(this))
+    }
   }
+
+  // DnD handlers will be bound declaratively via data-action on the drop zone
 
   /**
    * Prevents the browser's default behavior for drag events
@@ -89,7 +68,7 @@ export default class extends Controller {
   handleDrop(e) {
     const dt = e.dataTransfer
     const files = dt.files
-    this.handleFiles(files)
+    this.handleFiles(files, { triggerChange: true })
   }
 
   /**
@@ -97,7 +76,7 @@ export default class extends Controller {
    * Iterates through each file and uploads them one by one
    * @param {FileList} files - The files to be uploaded
    */
-  async handleFiles(files) {
+  async handleFiles(files, { triggerChange = false } = {}) {
     if (!files || files.length === 0) return
 
     if (this.isSingleImageMode()) {
@@ -106,15 +85,18 @@ export default class extends Controller {
         alert("Please choose a PNG, JPG, or WEBP image.")
         return
       }
-      if (this.maxSizeBytesValue && file.size > this.maxSizeBytesValue) {
-        alert("Image is too large. Max size is 5 MB.")
-        return
-      }
+      // TODO: Decide what the max size should be for the cover image and uncomment this
+      // if (this.maxSizeBytesValue && file.size > this.maxSizeBytesValue) {
+      //   alert("Image is too large. Max size is 5 MB.")
+      //   return
+      // }
       const dataTransfer = new DataTransfer()
       dataTransfer.items.add(file)
       this.inputTarget.files = dataTransfer.files
       this.updatePreview(file)
-      this.inputTarget.dispatchEvent(new Event("change"))
+      if (triggerChange) {
+        this.inputTarget.dispatchEvent(new Event("change", { bubbles: true }))
+      }
     } else {
       // Upload each file individually
       for (let file of files) {
@@ -129,7 +111,7 @@ export default class extends Controller {
    * @param {Event} event - The change event from the file input
    */
   fileSelected(event) {
-    this.handleFiles(event.target.files)
+    this.handleFiles(event.target.files, { triggerChange: false })
     if (!this.isSingleImageMode()) {
       event.target.value = ''
     }
@@ -234,6 +216,8 @@ export default class extends Controller {
     }
   }
 
+  clear(event) { this.removeCover(event) }
+
   /**
    * Updates the visibility of the "no files" message
    * Shows/hides the empty state based on whether files are present
@@ -307,10 +291,51 @@ export default class extends Controller {
     reader.onload = e => {
       this.previewTarget.src = e.target.result
       this.previewTarget.classList.remove("hidden")
+      this.previewTarget.dataset.existing = "false"
     }
     reader.readAsDataURL(file)
-    if (this.hasHintTarget) {
-      this.hintTarget.textContent = `${file.name} selected`
+    if (this.hasFileNameTarget) this.fileNameTarget.textContent = file.name || "Selected image"
+    if (this.hasFileTypeTarget) this.fileTypeTarget.textContent = file.type || "image/*"
+    this.hideInstructions()
+    this.showFileMeta()
+    this.showRemoveButton()
+  }
+
+  hideInstructions() {
+    if (this.hasInstructionsTarget) this.instructionsTarget.classList.add("hidden")
+  }
+
+  showFileMeta() {
+    if (this.hasFileMetaTarget) this.fileMetaTarget.classList.remove("hidden")
+  }
+
+  async removeCover(event) {
+    event.preventDefault()
+    // Reset UI
+    if (this.hasPreviewTarget) {
+      this.previewTarget.src = ""
+      this.previewTarget.classList.add("hidden")
+      this.previewTarget.dataset.existing = "false"
     }
+    if (this.hasFileMetaTarget) this.fileMetaTarget.classList.add("hidden")
+    if (this.hasFileNameTarget) this.fileNameTarget.textContent = ""
+    if (this.hasFileTypeTarget) this.fileTypeTarget.textContent = ""
+    if (this.hasInstructionsTarget) this.instructionsTarget.classList.remove("hidden")
+    if (this.hasInputTarget) this.inputTarget.value = ""
+    if (this.hasClearHiddenTarget) this.clearHiddenTarget.value = "1"
+    this.hideRemoveButton()
+  }
+
+  csrfToken() {
+    const el = document.querySelector('meta[name="csrf-token"]')
+    return el ? el.content : ""
+  }
+
+  showRemoveButton() {
+    if (this.hasRemoveButtonTarget) this.removeButtonTarget.classList.remove("hidden")
+  }
+
+  hideRemoveButton() {
+    if (this.hasRemoveButtonTarget) this.removeButtonTarget.classList.add("hidden")
   }
 }

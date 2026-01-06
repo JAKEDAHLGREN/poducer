@@ -33,7 +33,14 @@
             <div class="px-6 py-4">
               <!-- Podcast Title -->
               <h3 class="text-xl font-semibold text-gray-900 mb-2 line-clamp-1">
-                <%= podcast.name %>
+                <div class="flex items-center justify-between">
+                  <%= podcast.name %>
+                  <% if podcast.explicit? %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                      Explicit
+                    </span>
+                  <% end %>
+                </div>
               </h3>
 
               <!-- Description -->
@@ -42,17 +49,17 @@
               </p>
 
               <!-- Categories -->
-              <div class="flex flex-wrap gap-1 mb-4">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+              <div class="flex flex-wrap gap-1 mb-4 max-w-full">
+                <span class="block text-ellipsis overflow-hidden items-center px-2.5 py-0.5 rounded-full text-xs font-normal bg-orange-100 text-orange-800">
                   <%= podcast.primary_category %>
                 </span>
                 <% if podcast.secondary_category.present? %>
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  <span class="block text-ellipsis overflow-hidden items-center px-2.5 py-0.5 rounded-full text-xs font-normal bg-blue-100 text-blue-800">
                     <%= podcast.secondary_category %>
                   </span>
                 <% end %>
                 <% if podcast.tertiary_category.present? %>
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                  <span class="block text-ellipsis overflow-hidden items-center px-2.5 py-0.5 rounded-full text-xs font-normal bg-purple-100 text-purple-800">
                     <%= podcast.tertiary_category %>
                   </span>
                 <% end %>

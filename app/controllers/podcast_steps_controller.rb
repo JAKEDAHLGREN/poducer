@@ -17,6 +17,10 @@ class PodcastStepsController < ApplicationController
 
     # Only assign attributes if there are podcast params (not on summary step)
     if params[:podcast].present?
+      # Handle cover removal flag before attribute assignment
+      if params[:podcast][:remove_cover_art] == "1" && @podcast.cover_art.attached?
+        @podcast.cover_art.purge
+      end
       @podcast.assign_attributes(podcast_params) if podcast_params.present?
       # Manually normalize the website URL before validation
       normalize_website_url
