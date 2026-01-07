@@ -5,8 +5,7 @@ class PodcastsController < ApplicationController
   def index
     # Filter out empty draft podcasts - only show drafts that have at least a name
     base_podcasts = Current.user.admin? ? Podcast.all : Current.user.podcasts
-    @podcasts = base_podcasts.where.not(status: :draft, name: [ nil, "" ])
-                            .or(base_podcasts.where(status: [ :published, :archived ]))
+    @podcasts = base_podcasts.where.not(status: :draft, name: [ nil, "" ]).or(base_podcasts.where(status: [ :published, :archived ])).order(created_at: :desc)
   end
 
   def show

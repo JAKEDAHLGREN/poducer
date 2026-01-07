@@ -9,7 +9,8 @@ export default class extends Controller {
   // Define values that can be passed from HTML data attributes
   static values = {
     podcastId: Number,
-    maxSizeBytes: Number
+    maxSizeBytes: Number,
+    simpleMode: { type: Boolean, default: false } // when true, do not AJAX upload; assign to input (supports multi)
   }
 
   /**
@@ -98,9 +99,23 @@ export default class extends Controller {
         this.inputTarget.dispatchEvent(new Event("change", { bubbles: true }))
       }
     } else {
-      // Upload each file individually
-      for (let file of files) {
-        await this.uploadFile(file)
+      // Multi-file mode
+      const useSimple = this.simpleModeValue || (!this.hasPodcastIdValue && this.hasFileListTarget)
+      if (useSimple) {
+        const dataTransfer = new DataTransfer()
+        Array.from(files).forEach(f => {
+          if (this.isAcceptedType(f)) dataTransfer.items.add(f)
+        })
+        this.inputTarget.files = dataTransfer.files
+        this.updateFileList(this.inputTarget.files)
+        if (triggerChange) {
+          this.inputTarget.dispatchEvent(new Event("change", { bubbles: true }))
+        }
+      } else {
+        // Upload each file individually via AJAX (podcast flow)
+        for (let file of files) {
+          await this.uploadFile(file)
+        }
       }
     }
   }
@@ -111,8 +126,14 @@ export default class extends Controller {
    * @param {Event} event - The change event from the file input
    */
   fileSelected(event) {
-    this.handleFiles(event.target.files, { triggerChange: false })
-    if (!this.isSingleImageMode()) {
+    const files = event.target.files
+    const useSimple = this.simpleModeValue || (!this.hasPodcastIdValue && this.hasFileListTarget)
+    if (useSimple && !this.isSingleImageMode()) {
+      this.updateFileList(files)
+      return
+    }
+    this.handleFiles(files, { triggerChange: false })
+    if (!this.isSingleImageMode() && !this.simpleModeValue) {
       event.target.value = ''
     }
   }
@@ -124,8 +145,22 @@ export default class extends Controller {
    */
   async uploadFile(file) {
     const formData = new FormData()
-    formData.append('podcast[media][]', file)
-    const url = `/podcasts/${this.podcastIdValue}/wizard/media`
+    let url
+    // Episode immediate uploads (endpoint provided on dropZone)
+    const endpoint = this.hasDropZoneTarget ? (this.dropZoneTarget.dataset.endpoint || "") : ""
+    const kind = this.hasDropZoneTarget ? (this.dropZoneTarget.dataset.kind || "") : ""
+    if (endpoint) {
+      if (kind === "assets") {
+        formData.append('files[]', file)
+      } else {
+        formData.append('file', file)
+      }
+      url = endpoint
+    } else {
+      // Podcast cover media (existing behavior)
+      formData.append('podcast[media][]', file)
+      url = `/podcasts/${this.podcastIdValue}/wizard/media`
+    }
 
     try {
       const response = await fetch(url, {
@@ -235,6 +270,22 @@ export default class extends Controller {
     }
   }
 
+  updateFileList(fileList) {
+    if (!this.hasFileListTarget) return
+    this.fileListTarget.innerHTML = ''
+    Array.from(fileList || []).forEach(file => {
+      const row = document.createElement('div')
+      row.className = 'flex items-center justify-between p-2 bg-white rounded border'
+      row.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="text-sm">${this.getFileIcon(file.type)}</span>
+          <span class="text-sm text-gray-700">${file.name}</span>
+          <span class="text-xs text-gray-500">${this.formatFileSize(file.size)}</span>
+        </div>
+      `
+      this.fileListTarget.appendChild(row)
+    })
+  }
   /**
    * Formats file size in bytes to human-readable format
    * Converts bytes to KB, MB, GB as appropriate

@@ -12,6 +12,47 @@ class EpisodeStepsController < ApplicationController
     render_wizard
   end
 
+  # PATCH /podcasts/:podcast_id/episodes/:episode_id/wizard/assets
+  def assets
+    # Accept either files[] or single file (some browsers/controllers may send 'file')
+    incoming = params[:files].presence || params[:file].presence
+    unless incoming
+      return render json: { error: "No files provided" }, status: :unprocessable_entity
+    end
+    Array(incoming).each do |file|
+      @episode.assets.attach(file)
+    end
+    render json: { ok: true, count: @episode.assets.count }, status: :ok
+  end
+
+  # PATCH /podcasts/:podcast_id/episodes/:episode_id/wizard/raw_audio
+  def raw_audio
+    # Accept either file or files[]
+    file = params[:file].presence || Array(params[:files]).first
+    unless file.present?
+      return render json: { error: "No file provided" }, status: :unprocessable_entity
+    end
+    @episode.raw_audio.purge_later if @episode.raw_audio.attached?
+    @episode.raw_audio.attach(file)
+    render json: { ok: true, filename: @episode.raw_audio.filename.to_s }, status: :ok
+  end
+
+  # DELETE /podcasts/:podcast_id/episodes/:episode_id/wizard/assets/:attachment_id
+  def destroy_asset
+    attachment = @episode.assets.attachments.find_by(id: params[:attachment_id])
+    return render json: { error: "Not found" }, status: :not_found unless attachment
+    attachment.purge_later
+    render json: { ok: true }, status: :ok
+  end
+
+  # DELETE /podcasts/:podcast_id/episodes/:episode_id/wizard/raw_audio
+  def destroy_raw_audio
+    if @episode.raw_audio.attached?
+      @episode.raw_audio.purge_later
+    end
+    render json: { ok: true }, status: :ok
+  end
+
   def update
     session.delete(:validation_errors)
 
@@ -24,21 +65,56 @@ class EpisodeStepsController < ApplicationController
       filtered_params = filtered_params.except(:assets) if filtered_params[:assets]&.all?(&:blank?)
       filtered_params = filtered_params.except(:raw_audio) if filtered_params[:raw_audio].blank?
       filtered_params = filtered_params.except(:cover_art) if filtered_params[:cover_art].blank?
+      # Clear cover art if requested
+      if params[:episode][:remove_cover_art].to_s == "1"
+        @episode.cover_art.purge_later if @episode.cover_art.attached?
+      end
+      # Preserve existing episode number if the user leaves it blank
+      filtered_params = filtered_params.except(:number) if filtered_params.key?(:number) && filtered_params[:number].to_s.strip.blank?
+      # Join output formats array into a comma-separated string for storage
+      if filtered_params[:output_formats].is_a?(Array)
+        filtered_params[:output_formats] = filtered_params[:output_formats].reject(&:blank?).join(",")
+      end
 
       @episode.assign_attributes(filtered_params) if filtered_params.present?
     end
 
-    valid = case step
-    when :overview
-              @episode.valid?(:overview_step)
-    when :details
-              @episode.valid?(:details_step)
-    else
-              true
+    # Auto-assign the next available episode number on finalization if missing
+    if step == :summary && @episode.number.blank?
+      next_number = (@podcast.episodes.where.not(id: @episode.id).maximum(:number) || 0) + 1
+      @episode.number = next_number
     end
+
+    valid =
+      case step
+      when :overview
+        @episode.valid?(:overview_step)
+      when :details
+        @episode.valid?(:details_step)
+      when :summary
+        # On summary, ensure required fields from earlier steps are valid
+        @episode.valid?(:overview_step) & @episode.valid?(:details_step)
+      else
+        true
+      end
 
     if valid
       if @episode.save(validate: false)
+        # Optional: Update asset labels when provided
+        if params[:asset_labels].present?
+          labels = params[:asset_labels].to_unsafe_h rescue params[:asset_labels]
+          Array(@episode.assets.attachments).each do |attachment|
+            label_value = labels[attachment.id.to_s] || labels[attachment.blob.id.to_s]
+            next if label_value.nil?
+            begin
+              new_metadata = attachment.blob.metadata.merge("label" => label_value.to_s.strip)
+              attachment.blob.update!(metadata: new_metadata)
+            rescue => _
+              # Silently ignore metadata update errors for now
+            end
+          end
+        end
+
         if step == steps.last
           redirect_to_finish_wizard
         else
@@ -76,9 +152,15 @@ class EpisodeStepsController < ApplicationController
       :release_date,
       :format,
       :notes,
+      :guests,
+      :output_formats,
+      :deliver_mp3,
+      :deliver_mp4,
+      :deliver_mov,
       :raw_audio,
       :cover_art,
-      assets: []
+      assets: [],
+      output_formats: []
     )
   end
 

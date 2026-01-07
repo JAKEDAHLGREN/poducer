@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_02_000000) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_07_001000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -52,6 +52,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_02_000000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "revision_notes"
+    t.text "guests"
+    t.text "output_formats"
+    t.boolean "deliver_mp3", default: false, null: false
+    t.boolean "deliver_mp4", default: false, null: false
+    t.boolean "deliver_mov", default: false, null: false
     t.index ["podcast_id", "number"], name: "index_episodes_on_podcast_id_and_number", unique: true
     t.index ["podcast_id"], name: "index_episodes_on_podcast_id"
     t.index ["release_date"], name: "index_episodes_on_release_date"

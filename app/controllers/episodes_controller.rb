@@ -127,7 +127,25 @@ end
   end
 
   def episode_params
-    params.require(:episode).permit(:name, :number, :description, :links, :release_date, :format, :notes, :raw_audio, :edited_audio, :assets, :cover_art)
+    params.require(:episode).permit(
+      :name,
+      :number,
+      :description,
+      :links,
+      :release_date,
+      :format,
+      :notes,
+      :guests,
+      :output_formats,
+      :deliver_mp3,
+      :deliver_mp4,
+      :deliver_mov,
+      :raw_audio,
+      :edited_audio,
+      :assets,
+      :cover_art,
+      output_formats: []
+    )
   end
 
   # This method can stay as-is since it has specific business logic

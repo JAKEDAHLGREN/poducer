@@ -22,7 +22,13 @@ Rails.application.routes.draw do
         post :start_wizard
       end
 
-      resources :wizard, only: [ :show, :update ], controller: "episode_steps"
+      resources :wizard, only: [ :show, :update ], controller: "episode_steps" do
+        # Immediate uploads for episode wizard (avoid name collision with step :assets)
+        patch :upload_assets, on: :collection, action: :assets
+        patch :upload_raw_audio, on: :collection, action: :raw_audio
+        delete "uploads/assets/:attachment_id", to: "episode_steps#destroy_asset", as: :upload_asset
+        delete "uploads/raw_audio", to: "episode_steps#destroy_raw_audio"
+      end
       member do
         patch :submit_episode
         patch :start_editing

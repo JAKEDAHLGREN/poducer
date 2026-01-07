@@ -9,6 +9,19 @@ class Episode < ApplicationRecord
     "Entertainment",
     "Other"
   ].freeze
+
+  # File/output formats the user may request for the final deliverables
+  OUTPUT_FORMAT_OPTIONS = [
+    "MP3 128kbps",
+    "MP3 192kbps",
+    "MP3 320kbps",
+    "WAV",
+    "AAC/M4A",
+    "FLAC",
+    "MP4 720p",
+    "MP4 1080p"
+  ].freeze
+
   belongs_to :podcast
   # Updated enum to track the new status flow
   enum :status, {
@@ -29,8 +42,18 @@ class Episode < ApplicationRecord
 
   # Wizard step validations
   validates :name, :description, presence: true, on: :overview_step
-  validates :number, presence: true, numericality: { only_integer: true, greater_than: 0 }, on: :overview_step
-  validates :release_date, presence: true, on: :details_step
+  validates :notes, presence: true, on: :details_step
+
+  # Helpers for output formats stored as comma-separated text
+  def output_formats_list
+    return [] if output_formats.blank?
+    output_formats.split(",").map(&:strip).reject(&:blank?)
+  end
+
+  def output_formats_list=(values)
+    values = Array(values).map(&:to_s).map(&:strip).reject(&:blank?)
+    self.output_formats = values.join(",")
+  end
 
   # Status transition methods
   def submit_for_editing!

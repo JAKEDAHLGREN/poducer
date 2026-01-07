@@ -41,9 +41,32 @@
               { class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" } %>
         </div>
       </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <%= f.label :guests, "Guests (comma-separated)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= f.text_field :guests, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" %>
+        </div>
+        <div>
+          <%= f.label :links, "Links (comma-separated)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= f.text_field :links, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" %>
+        </div>
+      </div>
       <div>
-        <%= f.label :links, "Links or Guest Names", class: "block text-sm font-medium text-gray-700 mb-2" %>
-        <%= f.text_field :links, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" %>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Final Output Formats</label>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <label class="inline-flex items-center gap-2">
+            <%= f.check_box :deliver_mp3, { class: "h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500" }, true, false %>
+            <span class="text-sm text-gray-800">MP3</span>
+          </label>
+          <label class="inline-flex items-center gap-2">
+            <%= f.check_box :deliver_mp4, { class: "h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500" }, true, false %>
+            <span class="text-sm text-gray-800">MP4</span>
+          </label>
+          <label class="inline-flex items-center gap-2">
+            <%= f.check_box :deliver_mov, { class: "h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500" }, true, false %>
+            <span class="text-sm text-gray-800">MOV</span>
+          </label>
+        </div>
       </div>
       <div>
         <%= f.label :notes, "Production Notes", class: "block text-sm font-medium text-gray-700 mb-2" %>
@@ -55,56 +78,85 @@
     <div class="space-y-4">
       <h3 class="text-lg font-medium text-gray-900">Assets</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
+        <!-- Cover Art DnD -->
+        <div data-controller="media-upload">
           <%= f.label :cover_art, "Cover Art", class: "block text-sm font-medium text-gray-700 mb-2" %>
-          <% if @episode.cover_art.attached? %>
-            <div class="flex items-center space-x-3 mb-2">
-              <%= image_tag @episode.cover_art, class: "h-16 w-16 object-cover rounded-lg" %>
-              <div>
-                <p class="text-sm text-gray-900"><%= @episode.cover_art.filename %></p>
-                <p class="text-xs text-gray-500">Current cover art</p>
+          <div class="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-300 text-center"
+               data-media-upload-target="dropZone"
+               role="region"
+               aria-label="Episode cover image uploader"
+               data-action="dragover->media-upload#preventDefaults dragenter->media-upload#highlight dragleave->media-upload#unhighlight drop->media-upload#handleDrop">
+            <div data-media-upload-target="instructions" class="<%= 'hidden' if @episode.cover_art.attached? %>">
+              <div class="mb-3">
+                <svg class="mx-auto h-10 w-10 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
               </div>
+              <p class="text-gray-700 text-sm">
+                Drag and drop your cover image here, or
+                <br>
+                <button type="button" class="inline-flex items-center px-4 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700"
+                        data-action="click->media-upload#openFileDialog">
+                  Browse Files
+                </button>
+              </p>
+              <p class="text-gray-500 text-xs mt-1">PNG, JPG, or WEBP</p>
+              <p class="text-gray-500 text-xs mt-1">If no episode cover art is selected, we will default to the podcast cover art.</p>
             </div>
-          <% elsif @podcast.cover_art.attached? %>
-            <div class="flex items-center space-x-3 mb-2">
-              <%= image_tag @podcast.cover_art, class: "h-16 w-16 object-cover rounded-lg" %>
-              <div>
-                <p class="text-sm text-gray-900">Using podcast cover art</p>
-                <p class="text-xs text-gray-500">No episode cover uploaded. The podcast cover will be used.</p>
-              </div>
+            <div class="relative inline-block mt-4">
+              <% if @episode.cover_art.attached? %>
+                <%= image_tag @episode.cover_art, alt: "Cover image preview", class: "h-16 w-16 object-cover rounded-lg", data: { media_upload_target: "preview", existing: true } %>
+              <% else %>
+                <img data-media-upload-target="preview" alt="Cover image preview" class="h-16 w-16 object-cover rounded-lg hidden" data-existing="false">
+              <% end %>
             </div>
-          <% end %>
-          <%= f.file_field :cover_art, class: "w-full mt-2 text-sm text-gray-500 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-600 file:text-white hover:file:bg-orange-700" %>
+            <%= hidden_field_tag "episode[remove_cover_art]", "0", data: { media_upload_target: "clearHidden" } %>
+            <%= f.file_field :cover_art, direct_upload: true, accept: "image/png,image/jpeg,image/webp", class: "hidden", data: { media_upload_target: "input", action: "change->media-upload#fileSelected" } %>
+          </div>
         </div>
-        <div>
-          <%= f.label :raw_audio, "Raw Audio", class: "block text-sm font-medium text-gray-700 mb-2" %>
-          <% if @episode.raw_audio.attached? %>
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-sm text-gray-900"><%= @episode.raw_audio.filename %></span>
-              <%= link_to "Download", rails_blob_path(@episode.raw_audio, disposition: "attachment"), class: "text-orange-600 hover:text-orange-700 text-sm font-medium" %>
+        <!-- Multi-file uploader -->
+        <div data-controller="media-upload" data-media-upload-podcast-id-value="<%= @podcast.id %>">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Upload Audio/Video</label>
+          <div class=" bg-gray-50 text-center rounded-lg p-4 border-2 border-dashed border-gray-300"
+               data-media-upload-target="dropZone"
+               data-endpoint="/podcasts/<%= @podcast.id %>/episodes/<%= @episode.id %>/wizard/upload_assets"
+               data-kind="assets"
+               data-action="dragover->media-upload#preventDefaults dragenter->media-upload#highlight dragleave->media-upload#unhighlight drop->media-upload#handleDrop">
+            <div data-media-upload-target="instructions">
+              <p class="text-gray-700 text-sm">
+                Drag and drop audio/video files here, or
+                <br>
+                <button type="button" class="ml-1 inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700"
+                        data-action="click->media-upload#openFileDialog">
+                  Browse Files
+                </button>
+              </p>
+              <p class="text-gray-500 text-xs mt-1">You can select multiple files.</p>
             </div>
-          <% end %>
-          <%= f.file_field :raw_audio, accept: "audio/*", class: "w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-600 file:text-white hover:file:bg-orange-700" %>
+            <input type="file" accept="audio/*,video/*" multiple class="hidden" data-media-upload-target="input" data-action="change->media-upload#fileSelected">
+            <div class="mt-3 space-y-2" data-media-upload-target="fileList"></div>
+          </div>
         </div>
       </div>
-      <!-- Raw video section removed (revert) -->
+      <!-- Existing assets with labels -->
       <div>
-        <%= f.label :assets, "Additional Assets", class: "block text-sm font-medium text-gray-700 mb-2" %>
         <% if @episode.assets.any? %>
           <div class="space-y-2 max-h-48 overflow-y-auto mb-2">
             <% @episode.assets.each do |asset| %>
               <div class="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <span class="text-sm font-medium text-gray-900"><%= asset.filename %></span>
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-medium text-gray-900"><%= asset.filename %></span>
+                  <input type="text" name="asset_labels[<%= asset.id %>]" value="<%= asset.blob.metadata["label"].to_s %>" placeholder="Label (e.g., Raw audio, Intro, Outro, Ad read)" class="ml-2 w-64 rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" autocomplete="off">
+                </div>
                 <%= link_to "Download", rails_blob_path(asset, disposition: "attachment"), class: "text-orange-600 hover:text-orange-700 text-sm font-medium" %>
               </div>
             <% end %>
           </div>
+        <% else %>
+          <p class="text-sm text-gray-500">No assets uploaded yet.</p>
         <% end %>
-        <%= f.file_field :assets, multiple: true, class: "w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-600 file:text-white hover:file:bg-orange-700" %>
       </div>
     </div>
   </div>
   <%= render "episode_steps/pagination", f: f, step: step %>
 <% end %>
-
-
