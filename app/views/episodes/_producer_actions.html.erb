@@ -10,8 +10,14 @@
     Start Editing
   <% end %>
 <% elsif episode.editing? %>
-  <%= button_to complete_path, method: :patch, class: "w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200", form: { class: "w-full" } do %>
-    Submit Edited Episode
+  <% if episode.edited_audio.attached? %>
+    <%= button_to complete_path, method: :patch, class: "w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200", form: { class: "w-full" } do %>
+      Submit for Review
+    <% end %>
+  <% else %>
+    <button disabled class="w-full bg-gray-200 text-gray-500 font-medium py-3 px-4 rounded-lg text-center cursor-not-allowed">
+      Upload edited audio to submit for review
+    </button>
   <% end %>
 <% elsif episode.ready_to_publish? %>
   <%= button_to publish_path, method: :patch, class: "w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200", form: { class: "w-full" } do %>

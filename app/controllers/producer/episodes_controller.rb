@@ -33,6 +33,10 @@ class Producer::EpisodesController < ApplicationController
   end
 
   def complete_editing
+    unless @episode.edited_audio.attached?
+      return redirect_to producer_episode_path(@episode), alert: "Please upload the edited audio before submitting for review."
+    end
+
     if @episode.complete_editing!
       redirect_to producer_episodes_path, notice: "Episode editing completed."
     else

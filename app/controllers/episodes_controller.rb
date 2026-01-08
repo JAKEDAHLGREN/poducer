@@ -3,9 +3,11 @@ class EpisodesController < ApplicationController
   before_action :set_episode, only: [ :show, :edit, :update, :destroy, :submit_episode, :start_editing, :complete_editing, :revert_to_draft, :re_submit_for_editing, :approve_episode, :publish_episode ]
   before_action -> { authorize_resource_access(@episode) }, only: [ :show, :edit, :update, :destroy, :submit_episode, :start_editing, :complete_editing, :revert_to_draft, :re_submit_for_editing, :approve_episode, :publish_episode ]
   before_action :authorize_editing, only: [ :edit, :update ]
+  before_action -> { authorize_resource_access(@podcast) }, only: [ :index ]
 
   def index
-    @episodes = Current.user.admin? ? @podcast.episodes : @podcast.episodes.where(user: Current.user)
+    # All episodes for this podcast. Authorization above ensures access.
+    @episodes = @podcast.episodes
   end
 
   def start_wizard
@@ -85,6 +87,10 @@ class EpisodesController < ApplicationController
   end
 
   def complete_editing
+    unless @episode.edited_audio.attached?
+      return redirect_to podcast_episode_path(@podcast, @episode), alert: "Please upload the edited audio before submitting for review."
+    end
+
     if @episode.complete_editing!
       redirect_to podcast_episode_path(@podcast, @episode), notice: "Submitted edited episode for user review."
     else
