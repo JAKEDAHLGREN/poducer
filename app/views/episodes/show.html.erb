@@ -124,9 +124,19 @@
         <!-- Links/Guests -->
         <% if @episode.links.present? %>
           <div class="mb-8">
-            <h2 class="text-xl font-semibold text-gray-900 mb-3">Links & Guests</h2>
+            <h2 class="text-xl font-semibold text-gray-900 mb-3">Guest(s) & Links</h2>
             <div class="bg-gray-50 rounded-lg p-4">
-              <p class="text-gray-700 leading-relaxed"><%= @episode.links %></p>
+              <p class="text-gray-700 leading-relaxed">
+                <strong>
+                  Guests:
+                </strong>
+                <%= @episode.guests %>
+                <br>
+                <strong>
+                  Links:
+                </strong>
+                <%= @episode.links %>
+              </p>
             </div>
           </div>
         <% end %>
@@ -143,11 +153,11 @@
 
         <!-- Audio Files Section -->
         <div class="mb-8">
-          <h2 class="text-xl font-semibold text-gray-900 mb-4">Audio Files</h2>
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Uploaded Files</h2>
 
           <!-- Raw Audio -->
           <div class="bg-gray-50 rounded-lg p-4 mb-4">
-            <h3 class="font-medium text-gray-900 mb-2">Raw Audio</h3>
+            <h3 class="font-medium text-gray-900 mb-2">Raw Files</h3>
             <% if @episode.raw_audio.attached? %>
               <div class="flex items-center gap-2 space-x-3">
                 <svg class="w-8 h-8 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,14 +167,14 @@
                 <%= link_to "Download", rails_blob_path(@episode.raw_audio, disposition: "attachment"), class: "text-orange-600 hover:text-orange-700 text-sm font-medium" %>
               </div>
             <% else %>
-              <p class="text-gray-500 text-sm">No raw audio file uploaded</p>
+              <p class="text-gray-500 text-sm">No raw files uploaded</p>
             <% end %>
           </div>
 
           <!-- Edited Audio -->
           <div class="bg-gray-50 rounded-lg p-4 mb-4">
-            <h3 class="font-medium text-gray-900 mb-2">Edited Audio</h3>
-            <% if @episode.episode_complete? && @episode.edited_audio.attached? %>
+            <h3 class="font-medium text-gray-900 mb-2">Edited Assets</h3>
+            <% if @episode.edited_audio.attached? && (@episode.awaiting_user_review? || @episode.ready_to_publish? || @episode.episode_complete?) %>
               <div class="flex items-center space-x-3">
                 <svg class="w-8 h-8 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>

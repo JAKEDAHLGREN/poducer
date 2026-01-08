@@ -29,13 +29,13 @@
 
   <div class="bg-white rounded-lg p-4 border border-gray-200">
     <div class="flex items-center justify-center">
-      <div class="p-2 bg-yellow-100 rounded-lg">
-        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="p-2 bg-orange-100 rounded-lg">
+        <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
         </svg>
       </div>
       <div class="ml-3">
-        <p class="text-xs font-medium text-gray-600">Awaiting Review</p>
+        <p class="text-xs font-medium text-gray-600">Awaiting Client Review</p>
         <p class="text-2xl font-bold text-gray-900"><%= @awaiting_user_review_episodes.count %></p>
       </div>
     </div>
@@ -49,8 +49,8 @@
         </svg>
       </div>
       <div class="ml-3">
-        <p class="text-xs font-medium text-gray-600">Total Pending</p>
-        <p class="text-2xl font-bold text-gray-900"><%= @episodes.count %></p>
+        <p class="text-xs font-medium text-gray-600">Ready to Publish</p>
+        <p class="text-2xl font-bold text-gray-900"><%= @ready_to_publish_episodes.count %></p>
       </div>
     </div>
   </div>
