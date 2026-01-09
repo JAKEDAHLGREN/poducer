@@ -86,26 +86,39 @@
               <% end %>
             </div>
 
-            <!-- Edited Audio Upload/Download -->
+            <!-- Deliverables Upload (multi-file dropzone) -->
             <div class="border border-gray-200 rounded-lg p-4">
-              <h3 class="text-sm font-medium text-gray-900 mb-2">Edited Audio</h3>
-              <% if @episode.edited_audio.attached? %>
-                <p class="text-sm text-gray-500 mb-2"><%= @episode.edited_audio.filename %></p>
-                <%= link_to "Download", rails_blob_path(@episode.edited_audio, disposition: "attachment"),
-                    class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 mb-2" %>
-              <% else %>
-                <p class="text-sm text-gray-500 mb-2">No edited audio uploaded yet</p>
-              <% end %>
-
+              <h3 class="text-sm font-medium text-gray-900 mb-2">Deliverables</h3>
               <!-- Upload Form -->
               <%= form_with model: [:producer, @episode], local: true, multipart: true do |form| %>
-                <div class="mt-2">
-                  <%= form.file_field :edited_audio,
-                      class: "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" %>
+                <div data-controller="media-upload">
+                  <div class="bg-gray-50 text-center rounded-lg p-4 border-2 border-dashed border-gray-300"
+                                   data-media-upload-target="dropZone"
+                                  data-action="dragover->media-upload#preventDefaults dragenter->media-upload#highlight dragleave->media-upload#unhighlight drop->media-upload#handleDrop">
+                    <div data-media-upload-target="instructions">
+                      <p class="text-gray-700 text-sm">
+                        Drag and drop all deliverables here, or
+                        <br>
+                        <button type="button" class="ml-1 inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700" data-action="click->media-upload#openFileDialog">
+                          Browse Files
+                        </button>
+                      </p>
+                      <p class="text-gray-500 text-xs mt-1">You can select multiple files.</p>
+                    </div>
+                    <%= form.file_field :deliverables, multiple: true, class: "hidden", data: { media_upload_target: "input", action: "change->media-upload#fileSelected" } %>
+                    <div class="mt-3 space-y-2" data-media-upload-target="fileList"></div>
+                  </div>
                 </div>
-                <div class="mt-3">
-                  <%= form.submit "+ Upload Edited Audio",
-                      class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700" %>
+
+                <!-- Current Deliverables -->
+                <div class="mt-4">
+                  <%= turbo_frame_tag "producer_assets" do %>
+                    <%= render "producer/episodes/deliverables", episode: @episode %>
+                  <% end %>
+                </div>
+
+                <div class="flex justify-end">
+                  <%= form.submit "+ Upload Deliverables", class: "px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 mt-2" %>
                 </div>
               <% end %>
             </div>

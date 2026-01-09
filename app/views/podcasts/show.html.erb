@@ -27,7 +27,7 @@
       <div class="relative">
         <div class="aspect-video bg-gradient-to-br from-orange-100 to-orange-200">
           <% if @podcast.cover_art.attached? %>
-            <%= image_tag @podcast.cover_art, class: "w-full h-full object-cover" %>
+            <%= image_tag @podcast.cover_art, class: "w-full h-full object-fit object-center" %>
           <% else %>
             <div class="flex items-center justify-center h-full">
               <svg class="w-24 h-24 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

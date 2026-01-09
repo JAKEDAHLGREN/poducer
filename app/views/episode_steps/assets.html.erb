@@ -4,8 +4,8 @@
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden p-6 space-y-8">
     <!-- Deliverables -->
     <div>
-      <h3 class="text-lg font-medium text-gray-900 mb-3">Final Output Formats</h3>
-      <p class="text-sm text-gray-600 mb-3">Select which formats you want delivered.</p>
+      <h3 class="text-lg font-medium text-gray-900 mb-3">Edited File Formats</h3>
+      <p class="text-sm text-gray-600 mb-3">Select your preferred file format(s) </p>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
         <label class="inline-flex items-center gap-2">
           <%= f.check_box :deliver_mp3, { class: "h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500" }, true, false %>
@@ -48,7 +48,7 @@
         </div>
         <div class="relative inline-block mt-4">
           <% if @episode.cover_art.attached? %>
-            <%= image_tag @episode.cover_art, alt: "Cover image preview", class: "h-32 w-32 object-cover rounded-lg", data: { media_upload_target: "preview", existing: true } %>
+            <%= image_tag @episode.cover_art, alt: "Cover image preview", class: "h-32 w-32 object-fit object-center rounded-lg", data: { media_upload_target: "preview", existing: true } %>
           <% else %>
             <img data-media-upload-target="preview" alt="Cover image preview" class="h-32 w-32 object-cover rounded-lg hidden" data-existing="false">
           <% end %>
@@ -105,36 +105,14 @@
         </div>
         <!-- Right: existing assets list -->
         <div>
-          <% if @episode.persisted? && @episode.assets.attached? %>
-            <h4 class="text-sm font-medium text-gray-900 mb-2">Current Assets (<%= @episode.assets.count %>)</h4>
-            <div class="space-y-2">
-              <% @episode.assets.each do |asset| %>
-                <div class="flex items-center gap-4 bg-white p-2 rounded">
-                  <div class="flex items-center gap-2">
-                    <input
-                      type="text"
-                      name="asset_labels[<%= asset.id %>]"
-                      value="<%= asset.blob.metadata["label"].to_s %>"
-                      placeholder="Label (e.g., Raw audio, Intro, Outro, Ad read)"
-                      class="ml-2 w-64 rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm"
-                      autocomplete="off">
-                      <span class="text-sm text-orange-600">
-                        <%= asset.filename %>
-                      </span>
-                    </div>
-                    <%# TODO: Do I want the option to download at this step? (Probably not) %>
-                    <%#= link_to "Download", rails_blob_path(asset, disposition: "attachment"), class: "text-orange-600 hover:text-orange-700 text-sm font-medium" %>
-                  </div>
-                <% end %>
-              </div>
-            <% else %>
-              <p class="text-sm text-gray-500">No assets uploaded yet.</p>
-            <% end %>
-          </div>
+          <%= turbo_frame_tag "current_assets" do %>
+            <%= render "episode_steps/current_assets", episode: @episode %>
+          <% end %>
         </div>
       </div>
-
     </div>
 
-    <%= render "episode_steps/pagination", f: f, step: step %>
-  <% end %>
+  </div>
+
+  <%= render "episode_steps/pagination", f: f, step: step %>
+<% end %>

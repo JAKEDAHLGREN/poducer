@@ -39,6 +39,8 @@ class Episode < ApplicationRecord
   has_one_attached  :edited_audio
   has_one_attached  :cover_art
   has_many_attached :assets
+  # Files uploaded by the producer as final deliverables
+  has_many_attached :deliverables
 
   # Wizard step validations
   validates :name, :description, presence: true, on: :overview_step

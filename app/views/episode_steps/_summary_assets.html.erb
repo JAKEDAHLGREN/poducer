@@ -1,0 +1,23 @@
+<% if episode.assets.any? %>
+  <div class="space-y-2 max-h-62 overflow-y-auto mb-2">
+    <% episode.assets.each do |asset| %>
+      <div class="flex items-center p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <div class="flex items-center gap-4">
+          <input type="text"
+                 name="asset_labels[<%= asset.id %>]"
+                 value="<%= asset.blob.metadata["label"].to_s %>"
+                 placeholder="Label (e.g., Raw audio, Intro, Outro, Ad read)"
+                 class="w-fit ml-2  rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm"
+                 autocomplete="off">
+          <span class="text-sm font-medium text-gray-900"><%= asset.filename %></span>
+        </div>
+        <%= link_to "Delete",
+              wizard_destroy_asset_path(podcast_id: podcast.id, episode_id: episode.id, attachment_id: asset.id),
+              class: "text-red-600 hover:text-red-700 text-sm font-medium",
+              data: { turbo_method: :delete, turbo_confirm: "Delete this asset?" } %>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <p class="text-sm text-gray-500">No assets uploaded yet.</p>
+<% end %>

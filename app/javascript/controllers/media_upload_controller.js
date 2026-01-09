@@ -18,6 +18,8 @@ export default class extends Controller {
    * Sets up the drag-and-drop functionality
    */
   connect() {
+    // Maintain pending files across multiple selections in simple multi-file mode
+    this.pendingFiles = []
     // If a preview image is already shown (server-rendered), ensure UI reflects it
     if (this.hasPreviewTarget && !this.previewTarget.classList.contains("hidden")) {
       this.hideInstructions()
@@ -98,25 +100,37 @@ export default class extends Controller {
       if (triggerChange) {
         this.inputTarget.dispatchEvent(new Event("change", { bubbles: true }))
       }
-    } else {
-      // Multi-file mode
-      const useSimple = this.simpleModeValue || (!this.hasPodcastIdValue && this.hasFileListTarget)
-      if (useSimple) {
-        const dataTransfer = new DataTransfer()
-        Array.from(files).forEach(f => {
-          if (this.isAcceptedType(f)) dataTransfer.items.add(f)
-        })
-        this.inputTarget.files = dataTransfer.files
-        this.updateFileList(this.inputTarget.files)
-        if (triggerChange) {
-          this.inputTarget.dispatchEvent(new Event("change", { bubbles: true }))
-        }
       } else {
-        // Upload each file individually via AJAX (podcast flow)
-        for (let file of files) {
-          await this.uploadFile(file)
+        // Multi-file mode
+        const useSimple = this.simpleModeValue || (!this.hasPodcastIdValue && this.hasFileListTarget)
+        if (useSimple) {
+          // Merge newly chosen files into controller-level pending set
+          const next = Array.from(this.pendingFiles)
+          Array.from(files).forEach(f => {
+            if (this.isAcceptedType(f) && !this.hasFile(next, f)) next.push(f)
+          })
+          this.pendingFiles = next
+          const dt = new DataTransfer()
+          this.pendingFiles.forEach(f => dt.items.add(f))
+          this.inputTarget.files = dt.files
+          this.updateFileList(this.pendingFiles)
+          if (triggerChange) {
+            this.inputTarget.dispatchEvent(new Event("change", { bubbles: true }))
+          }
+        } else {
+          // AJAX uploads
+          const endpoint = this.hasDropZoneTarget ? (this.dropZoneTarget.dataset.endpoint || "") : ""
+          const kind = this.hasDropZoneTarget ? (this.dropZoneTarget.dataset.kind || "") : ""
+          if (endpoint && kind === "assets") {
+            // Batch all selected files in one request to avoid DOM replacement mid-loop
+            await this.uploadFilesBatch(files)
+          } else {
+            // Fallback: upload one by one
+            for (let file of files) {
+              await this.uploadFile(file)
+            }
+          }
         }
-      }
     }
   }
 
@@ -129,7 +143,16 @@ export default class extends Controller {
     const files = event.target.files
     const useSimple = this.simpleModeValue || (!this.hasPodcastIdValue && this.hasFileListTarget)
     if (useSimple && !this.isSingleImageMode()) {
-      this.updateFileList(files)
+      // Merge into pending and reflect in hidden input and UI
+      const next = Array.from(this.pendingFiles)
+      Array.from(files || []).forEach(f => {
+        if (this.isAcceptedType(f) && !this.hasFile(next, f)) next.push(f)
+      })
+      this.pendingFiles = next
+      const dt = new DataTransfer()
+      this.pendingFiles.forEach(f => dt.items.add(f))
+      this.inputTarget.files = dt.files
+      this.updateFileList(this.pendingFiles)
       return
     }
     this.handleFiles(files, { triggerChange: false })
@@ -167,18 +190,66 @@ export default class extends Controller {
         method: 'PATCH',
         body: formData,
         headers: {
-          'Accept': 'application/json',
+          // Ask server for a Turbo Stream to update only the assets list (no page reload)
+          'Accept': 'text/vnd.turbo-stream.html, application/json',
           'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
         }
       })
 
       if (response.ok) {
-        window.location.reload()
+        const contentType = response.headers.get('content-type') || ''
+        if (contentType.includes('turbo-stream')) {
+          const stream = await response.text()
+          if (window.Turbo && typeof window.Turbo.renderStreamMessage === 'function') {
+            window.Turbo.renderStreamMessage(stream)
+          } else {
+            // Fallback: if Turbo isn't available, do a soft refresh
+            window.location.reload()
+          }
+        } else {
+          // JSON fallback: avoid full reload to preserve cover preview
+          // Optionally, you could update a counter or toast here
+        }
       } else {
         alert('Upload failed. Please try again.')
       }
     } catch (error) {
       console.error("Upload error:", error)
+      alert('Upload failed. Please try again.')
+    }
+  }
+  /**
+   * Batch upload multiple files to assets endpoint
+   */
+  async uploadFilesBatch(files) {
+    const endpoint = this.hasDropZoneTarget ? (this.dropZoneTarget.dataset.endpoint || "") : ""
+    if (!endpoint) return
+    const formData = new FormData()
+    Array.from(files || []).forEach(f => formData.append('files[]', f))
+    try {
+      const response = await fetch(endpoint, {
+        method: 'PATCH',
+        body: formData,
+        headers: {
+          'Accept': 'text/vnd.turbo-stream.html, application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+        }
+      })
+      if (response.ok) {
+        const contentType = response.headers.get('content-type') || ''
+        if (contentType.includes('turbo-stream')) {
+          const stream = await response.text()
+          if (window.Turbo && typeof window.Turbo.renderStreamMessage === 'function') {
+            window.Turbo.renderStreamMessage(stream)
+          } else {
+            window.location.reload()
+          }
+        }
+      } else {
+        alert('Upload failed. Please try again.')
+      }
+    } catch (e) {
+      console.error("Batch upload error:", e)
       alert('Upload failed. Please try again.')
     }
   }
@@ -285,6 +356,18 @@ export default class extends Controller {
       `
       this.fileListTarget.appendChild(row)
     })
+  }
+  /**
+   * Check if a DataTransfer (or FileList) already contains a file
+   * We compare by name, size and lastModified for reasonable uniqueness
+   */
+  hasFile(fileList, file) {
+    return Array.from(fileList || []).some(f =>
+      f.name === file.name &&
+      f.size === file.size &&
+      // lastModified may be undefined in some browsers; guard comparison
+      (f.lastModified === undefined || file.lastModified === undefined || f.lastModified === file.lastModified)
+    )
   }
   /**
    * Formats file size in bytes to human-readable format

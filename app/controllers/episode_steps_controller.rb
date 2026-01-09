@@ -17,12 +17,33 @@ class EpisodeStepsController < ApplicationController
     # Accept either files[] or single file (some browsers/controllers may send 'file')
     incoming = params[:files].presence || params[:file].presence
     unless incoming
-      return render json: { error: "No files provided" }, status: :unprocessable_entity
+      respond_to do |format|
+        format.json { render json: { error: "No files provided" }, status: :unprocessable_entity }
+        format.turbo_stream { head :unprocessable_entity }
+      end
+      return
     end
     Array(incoming).each do |file|
       @episode.assets.attach(file)
     end
-    render json: { ok: true, count: @episode.assets.count }, status: :ok
+    respond_to do |format|
+      format.json { render json: { ok: true, count: @episode.assets.count }, status: :ok }
+      format.turbo_stream do
+        render turbo_stream: [
+          turbo_stream.replace(
+            "current_assets",
+            partial: "episode_steps/current_assets",
+            locals: { episode: @episode }
+          ),
+          turbo_stream.replace(
+            "summary_assets",
+            partial: "episode_steps/summary_assets",
+            locals: { episode: @episode, podcast: @podcast }
+          )
+        ]
+      end
+      format.html { redirect_to podcast_episode_wizard_path(@podcast, @episode, :summary), notice: "Assets uploaded." }
+    end
   end
 
   # PATCH /podcasts/:podcast_id/episodes/:episode_id/wizard/raw_audio
@@ -40,9 +61,35 @@ class EpisodeStepsController < ApplicationController
   # DELETE /podcasts/:podcast_id/episodes/:episode_id/wizard/assets/:attachment_id
   def destroy_asset
     attachment = @episode.assets.attachments.find_by(id: params[:attachment_id])
-    return render json: { error: "Not found" }, status: :not_found unless attachment
+    unless attachment
+      respond_to do |format|
+        format.json { render json: { error: "Not found" }, status: :not_found }
+        format.turbo_stream { head :not_found }
+        format.html { redirect_to podcast_episode_wizard_path(@podcast, @episode, :summary), alert: "Asset not found." }
+      end
+      return
+    end
     attachment.purge_later
-    render json: { ok: true }, status: :ok
+    respond_to do |format|
+      format.json { render json: { ok: true }, status: :ok }
+      format.turbo_stream do
+        render turbo_stream: [
+          turbo_stream.replace(
+            "current_assets",
+            partial: "episode_steps/current_assets",
+            locals: { episode: @episode }
+          ),
+          turbo_stream.replace(
+            "summary_assets",
+            partial: "episode_steps/summary_assets",
+            locals: { episode: @episode, podcast: @podcast }
+          )
+        ]
+      end
+      format.html do
+        redirect_to podcast_episode_wizard_path(@podcast, @episode, :summary), notice: "Asset deleted."
+      end
+    end
   end
 
   # DELETE /podcasts/:podcast_id/episodes/:episode_id/wizard/raw_audio

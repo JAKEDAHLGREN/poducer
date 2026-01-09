@@ -157,14 +157,22 @@
 
           <!-- Raw Audio -->
           <div class="bg-gray-50 rounded-lg p-4 mb-4">
-            <h3 class="font-medium text-gray-900 mb-2">Raw Files</h3>
-            <% if @episode.raw_audio.attached? %>
-              <div class="flex items-center gap-2 space-x-3">
-                <svg class="w-8 h-8 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-                </svg>
-                <span class="text-sm text-gray-600"><%= @episode.raw_audio.filename %></span>
-                <%= link_to "Download", rails_blob_path(@episode.raw_audio, disposition: "attachment"), class: "text-orange-600 hover:text-orange-700 text-sm font-medium" %>
+            <h3 class="font-medium text-gray-900 mb-2">
+              Raw Files(<%= @episode.assets.count %>)
+            </h3>
+            <% if @episode.assets.attached? %>
+              <div class="bg-gray-50 rounded-lg p-4">
+                <div class="space-y-2">
+                  <% @episode.assets.each do |asset| %>
+                    <div class="flex items-center space-x-3">
+                      <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                      </svg>
+                      <span class="text-sm text-gray-600"><%= asset.filename %></span>
+                      <%= link_to "Download", rails_blob_path(asset, disposition: "attachment"), class: "text-orange-600 hover:text-orange-700 text-sm font-medium" %>
+                    </div>
+                  <% end %>
+                </div>
               </div>
             <% else %>
               <p class="text-gray-500 text-sm">No raw files uploaded</p>
@@ -173,15 +181,22 @@
 
           <!-- Edited Audio -->
           <div class="bg-gray-50 rounded-lg p-4 mb-4">
-            <h3 class="font-medium text-gray-900 mb-2">Edited Assets</h3>
-            <% if @episode.edited_audio.attached? && (@episode.awaiting_user_review? || @episode.ready_to_publish? || @episode.episode_complete?) %>
-              <div class="flex items-center space-x-3">
-                <svg class="w-8 h-8 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-                </svg>
+            <h3 class="font-medium text-gray-900 mb-2">Deliverables (<%= @episode.deliverables.count %>)</h3>
+            <% if @episode.deliverables.attached? && (@episode.awaiting_user_review? || @episode.ready_to_publish? || @episode.episode_complete?) %>
+              <div class="flex flex-col items-start justify-start space-y-2 space-x-3">
 
-                <span class="text-sm text-gray-600"><%= @episode.edited_audio.filename %></span>
-                <%= link_to "Download", rails_blob_path(@episode.edited_audio, disposition: "attachment"), class: "text-orange-600 hover:text-orange-700 text-sm font-medium" %>
+                <% @episode.deliverables.each do |deliverable| %>
+                  <div class="flex items-center space-x-3">
+                    <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                    </svg>
+
+                    <span class="text-sm text-gray-600">
+                      <%= deliverable.filename %>
+                    </span>
+                    <%= link_to "Download", rails_blob_path(deliverable, disposition: "attachment"), class: "text-orange-600 hover:text-orange-700 text-sm font-medium" %>
+                </div>
+                <% end %>
               </div>
             <% elsif @episode.editing? %>
               <p class="text-gray-500 text-sm">Episode is currently being edited by producer</p>
@@ -193,22 +208,7 @@
           </div>
 
           <!-- Additional Assets -->
-          <% if @episode.assets.attached? %>
-            <div class="bg-gray-50 rounded-lg p-4">
-              <h3 class="font-medium text-gray-900 mb-2">Additional Assets (<%= @episode.assets.count %>)</h3>
-              <div class="space-y-2">
-                <% @episode.assets.each do |asset| %>
-                  <div class="flex items-center space-x-3">
-                    <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
-                    </svg>
-                    <span class="text-sm text-gray-600"><%= asset.filename %></span>
-                    <%= link_to "Download", rails_blob_path(asset, disposition: "attachment"), class: "text-orange-600 hover:text-orange-700 text-sm font-medium" %>
-                  </div>
-                <% end %>
-              </div>
-            </div>
-          <% end %>
+
         </div>
 
         <!-- Action Buttons -->

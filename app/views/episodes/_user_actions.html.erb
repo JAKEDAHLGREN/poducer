@@ -19,8 +19,10 @@
 <% end %>
 
 <% if episode.editing? %>
-  <h1 class="text-black text-center text-xl font-bold">Editing is in Progress</h1>
-  <p class="text-black text-center text-sm">A producer is currently editing this episode. Please check back later to review the changes.</p>
+<div class="flex items-center justify-start gap-2 bg-orange-100 rounded-lg p-4">
+    <h1 class="text-orange-600 text-center text-xl font-bold">Editing is in Progress:</h1>
+    <p class="text-black text-center text-sm mt-1">A producer is currently editing this episode. Please check back later to review the changes.</p>
+</div>
 <% end %>
 
 <% if episode.awaiting_user_review? %>
