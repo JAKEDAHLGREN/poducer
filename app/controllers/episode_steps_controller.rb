@@ -147,12 +147,31 @@ class EpisodeStepsController < ApplicationController
 
     if valid
       if @episode.save(validate: false)
-        # Optional: Update asset labels when provided
+        # Update asset labels when provided
+        # Support both formats: asset_labels[attachment_id] and asset_labels_json (filename-based)
         if params[:asset_labels].present?
           labels = params[:asset_labels].to_unsafe_h rescue params[:asset_labels]
+          
+          # Handle filename-based labels from JSON
+          if params[:asset_labels_json].present?
+            begin
+              filename_labels = JSON.parse(params[:asset_labels_json])
+              # Match labels by filename
+              @episode.assets.attachments.each do |attachment|
+                filename = attachment.filename.to_s
+                if filename_labels[filename].present?
+                  labels[attachment.id.to_s] = filename_labels[filename]
+                end
+              end
+            rescue JSON::ParserError
+              # Ignore JSON parse errors
+            end
+          end
+          
+          # Update metadata for each attachment
           Array(@episode.assets.attachments).each do |attachment|
             label_value = labels[attachment.id.to_s] || labels[attachment.blob.id.to_s]
-            next if label_value.nil?
+            next if label_value.blank?
             begin
               new_metadata = attachment.blob.metadata.merge("label" => label_value.to_s.strip)
               attachment.blob.update!(metadata: new_metadata)

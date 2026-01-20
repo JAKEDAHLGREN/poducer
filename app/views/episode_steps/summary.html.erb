@@ -77,93 +77,37 @@
     <!-- Assets -->
     <div class="space-y-4">
       <h3 class="text-lg font-medium text-gray-900">Assets</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Cover Art DnD (matched to assets step) -->
-        <div data-controller="media-upload">
-          <%= f.label :cover_art, "Cover Art", class: "block text-sm font-medium text-gray-700 mb-2" %>
-          <div class="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-300 text-center"
-               data-media-upload-target="dropZone"
-               role="region"
-               aria-label="Episode cover image uploader"
-               data-action="dragover->media-upload#preventDefaults dragenter->media-upload#highlight dragleave->media-upload#unhighlight drop->media-upload#handleDrop">
-            <div data-media-upload-target="instructions" class="<%= 'hidden' if @episode.cover_art.attached? %>">
-              <div class="mb-3">
-                <svg class="mx-auto h-10 w-10 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </div>
-              <p class="text-gray-700 text-sm">
-                Drag and drop your cover image here, or
-                <br>
-                <button type="button" class="inline-flex items-center px-4 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-                        data-action="click->media-upload#openFileDialog">
-                  Browse Files
-                </button>
-              </p>
-              <p class="text-gray-500 text-xs mt-1" data-media-upload-target="hint">
-                PNG, JPG, or WEBP
-              </p>
-              <p class="text-gray-800 text-xs mt-1">
-                If no episode cover art is selected, we will default to the podcast cover art.
-              </p>
-            </div>
-            <div class="relative inline-block mt-4">
-              <% if @episode.cover_art.attached? %>
-                <%= image_tag @episode.cover_art, alt: "Cover image preview", class: "h-32 w-32 object-fit object-center rounded-lg", data: { media_upload_target: "preview", existing: true } %>
-              <% else %>
-                <img data-media-upload-target="preview" alt="Cover image preview" class="h-32 w-32 object-cover rounded-lg hidden" data-existing="false">
-              <% end %>
-              <button type="button" class="absolute -right-2 -top-2 z-10 flex items-center justify-center h-6 w-6 rounded-full bg-gray-800 text-white hover:bg-red-600 shadow focus:outline-none <%= 'hidden' unless @episode.cover_art.attached? %>" title="Remove File" data-media-upload-target="removeButton">
-                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
-            <%= hidden_field_tag "episode[remove_cover_art]", "0", data: { media_upload_target: "clearHidden" } %>
-            <div class="mt-3 text-sm text-gray-700 <%= 'hidden' unless @episode.cover_art.attached? %>" data-media-upload-target="fileMeta">
-              <div class="font-medium">
-                <span data-media-upload-target="fileName"><%= @episode.cover_art.attached? ? @episode.cover_art.filename.to_s : '' %></span>
-                <span class="text-gray-500">(<span data-media-upload-target="fileType"><%= @episode.cover_art.attached? ? @episode.cover_art.content_type : '' %></span>)</span>
-              </div>
-              <button type="button" class="mt-1 text-orange-700 underline" data-action="click->media-upload#openFileDialog">Choose a different image</button>
-            </div>
-            <%= f.file_field :cover_art,
-                  direct_upload: true,
-                  accept: "image/png,image/jpeg,image/webp",
-                  class: "hidden",
-                  data: { media_upload_target: "input", action: "change->media-upload#fileSelected" } %>
-          </div>
+      <div class="grid grid-cols-1 gap-6">
+        <div class="col-span-1">
+          <!-- Cover Art -->
+          <%= render "shared/file_upload",
+                form: f,
+                attachment_name: :cover_art,
+                multiple: false,
+                accept: "image/png,image/jpeg,image/webp",
+                existing_files: @episode.cover_art.attached? ? [@episode.cover_art] : [],
+                label_param: "cover_art_labels",
+                section_label: "Cover Art",
+                instructions: "Drag and drop your cover image here, or",
+                hint: "PNG, JPG, or WEBP. If no episode cover art is selected, we will default to the podcast cover art." %>
+          <%= hidden_field_tag "episode[remove_cover_art]", "0", id: "episode_remove_cover_art_summary" %>
+
         </div>
-        <!-- Multi-file uploader -->
-        <div data-controller="media-upload" data-media-upload-podcast-id-value="<%= @podcast.id %>">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Upload Audio/Video</label>
-          <div class=" bg-gray-50 text-center rounded-lg p-4 border-2 border-dashed border-gray-300"
-               data-media-upload-target="dropZone"
-               data-endpoint="/podcasts/<%= @podcast.id %>/episodes/<%= @episode.id %>/wizard/upload_assets"
-               data-kind="assets"
-               data-action="dragover->media-upload#preventDefaults dragenter->media-upload#highlight dragleave->media-upload#unhighlight drop->media-upload#handleDrop">
-            <div data-media-upload-target="instructions">
-              <p class="text-gray-700 text-sm">
-                Drag and drop audio/video files here, or
-                <br>
-                <button type="button" class="ml-1 inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700"
-                        data-action="click->media-upload#openFileDialog">
-                  Browse Files
-                </button>
-              </p>
-              <p class="text-gray-500 text-xs mt-1">You can select multiple files.</p>
-            </div>
-            <input type="file" accept="audio/*,video/*" multiple class="hidden" data-media-upload-target="input" data-action="change->media-upload#fileSelected">
-            <div class="mt-3 space-y-2" data-media-upload-target="fileList"></div>
-          </div>
+
+        <div class="col-span-1">
+          <!-- Assets -->
+          <%= render "shared/file_upload",
+                form: f,
+                attachment_name: :assets,
+                multiple: true,
+                accept: "audio/*,video/*",
+                existing_files: @episode.assets.attachments,
+                delete_url: wizard_destroy_asset_path(podcast_id: @podcast.id, episode_id: @episode.id, attachment_id: ":id"),
+                label_param: "asset_labels",
+                section_label: "Upload Audio/Video",
+                instructions: "Drag and drop audio/video files here, or",
+                hint: "You can select multiple files." %>
         </div>
-      </div>
-      <!-- Existing assets with labels -->
-      <div>
-        <%= turbo_frame_tag "summary_assets" do %>
-          <%= render "episode_steps/summary_assets", episode: @episode, podcast: @podcast %>
-        <% end %>
       </div>
     </div>
   </div>

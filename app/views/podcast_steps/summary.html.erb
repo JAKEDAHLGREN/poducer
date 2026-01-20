@@ -51,54 +51,19 @@
           <div class="grid grid-cols-1">
             <!-- Cover Upload -->
             <div>
-              <%= f.label :cover_art, @podcast.cover_art.attached? ? "Current Cover Image" : "Upload Cover Image", class: "block text-md font-medium text-black" %>
-
-              <!-- Drag & drop area -->
-              <div class="mt-2 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors" data-media-upload-target="dropZone" role="region" aria-label="Cover image uploader" data-action="dragover->media-upload#preventDefaults dragenter->media-upload#highlight dragleave->media-upload#unhighlight drop->media-upload#handleDrop">
-                <div data-media-upload-target="instructions" class="<%= 'hidden' if @podcast.cover_art.attached? %>">
-                  <div class="mb-3">
-                    <svg class="mx-auto h-10 w-10 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                  </div>
-
-                  <p class="text-gray-700 text-sm">
-                    Drag and drop your cover image here, or
-                    <br>
-                    <button type="button" class="inline-flex items-center px-4 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-                            data-action="click->media-upload#openFileDialog">
-                      Browse Files
-                    </button>
-                  </p>
-                  <p class="text-gray-500 text-xs mt-1" data-media-upload-target="hint">
-                    PNG, JPG, or WEBP
-                  </p>
-                </div>
-                <div class="relative inline-block mt-4">
-                  <% if @podcast.cover_art.attached? %>
-                    <%= image_tag @podcast.cover_art, alt: "Cover image preview", class: "h-32 w-32 object-cover rounded-lg", data: { media_upload_target: "preview", existing: true } %>
-                  <% else %>
-                    <img data-media-upload-target="preview" alt="Cover image preview" class="h-32 w-32 object-cover rounded-lg hidden" data-existing="false">
-                  <% end %>
-                  <button type="button" class="absolute -right-2 -top-2 z-10 flex items-center justify-center h-6 w-6 rounded-full bg-gray-800 text-white hover:bg-red-600 shadow focus:outline-none <%= 'hidden' unless @podcast.cover_art.attached? %>" title="Remove File" data-media-upload-target="removeButton">
-                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                  </button>
-                </div>
-                <%= hidden_field_tag "podcast[remove_cover_art]", "0", data: { media_upload_target: "clearHidden" } %>
-                <div class="mt-3 text-sm text-gray-700 <%= 'hidden' unless @podcast.cover_art.attached? %>" data-media-upload-target="fileMeta">
-                  <div class="font-medium">
-                    <span data-media-upload-target="fileName"><%= @podcast.cover_art.attached? ? @podcast.cover_art.filename.to_s : '' %></span>
-                    <span class="text-gray-500">(<span data-media-upload-target="fileType"><%= @podcast.cover_art.attached? ? @podcast.cover_art.content_type : '' %></span>)</span>
-                  </div>
-                  <button type="button" class="mt-1 text-orange-700 underline" data-action="click->media-upload#openFileDialog">Choose a different image</button>
-                </div>
-                <%= f.file_field :cover_art, direct_upload: true, accept: "image/png,image/jpeg,image/webp", class: "hidden", data: { media_upload_target: "input", action: "change->media-upload#fileSelected" } %>
-              </div>
+              <%= render "shared/file_upload",
+                    form: f,
+                    attachment_name: :cover_art,
+                    multiple: false,
+                    accept: "image/png,image/jpeg,image/webp",
+                    existing_files: @podcast.cover_art.attached? ? [@podcast.cover_art] : [],
+                    label_param: "cover_art_labels",
+                    section_label: @podcast.cover_art.attached? ? "Current Cover Image" : "Upload Cover Image",
+                    instructions: "Drag and drop your cover image here, or",
+                    hint: "PNG, JPG, or WEBP" %>
+              <%= hidden_field_tag "podcast[remove_cover_art]", "0", id: "podcast_remove_cover_art_summary" %>
+            </div>
           </div>
-        </div>
 
         <!-- Website -->
         <div class="border-b border-gray-200 pb-6">

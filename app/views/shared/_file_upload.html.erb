@@ -1,0 +1,158 @@
+<%#
+  Reusable file upload component with drag-and-drop, labels, and side-by-side layout
+  
+  Required locals:
+    - form: The form builder object
+    - attachment_name: The ActiveStorage attachment name (e.g., :assets, :cover_art, :deliverables)
+  
+  Optional locals:
+    - multiple: Boolean, default false (single file mode)
+    - accept: String, file type restrictions (e.g., "image/*", "audio/*,video/*")
+    - max_size_mb: Number, maximum file size in MB
+    - existing_files: Array of existing file objects (ActiveStorage attachments or hash with id, filename, etc.)
+    - delete_url: String, URL pattern for deleting files (use :id placeholder)
+    - label_param: String, form parameter name for labels (default: "asset_labels")
+    - section_label: String, label for the upload section
+    - instructions: Custom instructions text
+    - hint: Custom hint text below instructions
+-%>
+<%
+  attachment_name = local_assigns[:attachment_name] || :files
+  multiple = local_assigns.fetch(:multiple, false)
+  accept = local_assigns[:accept]
+  max_size_mb = local_assigns[:max_size_mb]
+  existing_files = local_assigns[:existing_files] || []
+  delete_url = local_assigns[:delete_url]
+  label_param = local_assigns.fetch(:label_param, "asset_labels")
+  section_label = local_assigns.fetch(:section_label, attachment_name.to_s.humanize)
+  instructions = local_assigns[:instructions] || "Drag and drop files here, or"
+  hint = local_assigns[:hint]
+  
+  # Prepare existing files data for Stimulus
+  existing_files_data = existing_files.map do |file|
+    {
+      id: file.respond_to?(:id) ? file.id : file[:id],
+      filename: file.respond_to?(:filename) ? file.filename.to_s : file[:filename],
+      size: file.respond_to?(:byte_size) ? file.byte_size : file[:size],
+      content_type: file.respond_to?(:content_type) ? file.content_type : file[:content_type],
+      label: file.respond_to?(:metadata) ? (file.metadata["label"] || "") : (file[:label] || "")
+    }
+  end
+%>
+
+<div class="space-y-4" data-controller="file-upload"
+     data-file-upload-multiple-value="<%= multiple %>"
+     data-file-upload-accept-value="<%= accept %>"
+     data-file-upload-max-size-bytes-value="<%= max_size_mb ? (max_size_mb * 1024 * 1024).to_i : nil %>"
+     data-file-upload-attachment-name-value="<%= attachment_name %>"
+     data-file-upload-label-param-value="<%= label_param %>"
+     data-file-upload-delete-url-value="<%= delete_url %>"
+     data-file-upload-existing-files-value="<%= existing_files_data.to_json %>">
+  
+  <% if section_label.present? %>
+    <h3 class="text-lg font-medium text-gray-900"><%= section_label %></h3>
+  <% end %>
+  
+  <div class="flex gap-6">
+    <!-- Left: Dropzone -->
+    <div class="flex-1">
+      <div class="bg-gray-50 rounded-lg p-6 border-2 border-dashed border-gray-300 text-center hover:border-gray-400 transition-colors min-h-[200px] flex items-center justify-center"
+           data-file-upload-target="dropZone"
+           data-action="dragover->file-upload#preventDefaults dragenter->file-upload#highlight dragleave->file-upload#unhighlight drop->file-upload#handleDrop">
+        
+        <div data-file-upload-target="instructions">
+          <div class="mb-3">
+            <svg class="mx-auto h-10 w-10 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+              <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
+          
+          <p class="text-gray-700 text-sm">
+            <%= instructions %>
+            <br>
+            <button type="button" 
+                    class="inline-flex items-center px-4 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 mt-2"
+                    data-action="click->file-upload#openFileDialog">
+              Browse Files
+            </button>
+          </p>
+          
+          <% if hint %>
+            <p class="text-gray-500 text-xs mt-1"><%= hint %></p>
+          <% end %>
+        </div>
+        
+        <!-- Hidden file input -->
+        <%= form.file_field attachment_name,
+              direct_upload: true,
+              multiple: multiple,
+              accept: accept,
+              class: "hidden",
+              data: { 
+                file_upload_target: "input",
+                action: "change->file-upload#fileSelected"
+              } %>
+      </div>
+    </div>
+    
+    <!-- Right: File List -->
+    <div class="flex-1">
+      <div class="bg-white rounded-lg border border-gray-200 p-4 min-h-[200px]">
+        <h4 class="text-sm font-medium text-gray-900 mb-3">
+          Uploaded Files
+          <span class="text-gray-500 font-normal" data-file-upload-target="fileCount">
+            (<%= existing_files.count %>)
+          </span>
+        </h4>
+        
+        <div class="space-y-2 max-h-96 overflow-y-auto" data-file-upload-target="fileList">
+          <% if existing_files.any? %>
+            <% existing_files.each do |file| %>
+              <div class="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg">
+                <div class="flex-1 flex items-center gap-3 min-w-0">
+                  <span class="text-lg flex-shrink-0">
+                    <% content_type = file.respond_to?(:content_type) ? file.content_type : file[:content_type] %>
+                    <%= content_type&.start_with?("image/") ? "🖼️" : (content_type&.start_with?("audio/") ? "🎵" : (content_type&.start_with?("video/") ? "🎥" : "📁")) %>
+                  </span>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-medium text-gray-900 truncate">
+                      <%= file.respond_to?(:filename) ? file.filename : file[:filename] %>
+                    </div>
+                    <% size = file.respond_to?(:byte_size) ? file.byte_size : file[:size] %>
+                    <% if size %>
+                      <div class="text-xs text-gray-500">
+                        <%= number_to_human_size(size) %>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                  <input
+                    type="text"
+                    name="<%= label_param %>[<%= file.respond_to?(:id) ? file.id : file[:id] %>]"
+                    value="<%= file.respond_to?(:metadata) ? (file.metadata["label"] || "") : (file[:label] || "") %>"
+                    placeholder="Label (optional)"
+                    class="w-48 rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm"
+                    autocomplete="off"
+                  />
+                  <%# Always show delete button - controller will handle the deletion method %>
+                  <button
+                    type="button"
+                    class="text-red-600 hover:text-red-700 p-1 text-xl font-bold leading-none"
+                    data-action="click->file-upload#removeFileClick"
+                    data-file-id="<%= file.respond_to?(:id) ? file.id : file[:id] %>"
+                    title="Remove file"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <p class="text-sm text-gray-500 text-center py-4">No files uploaded yet.</p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

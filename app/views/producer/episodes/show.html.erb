@@ -86,39 +86,21 @@
               <% end %>
             </div>
 
-            <!-- Deliverables Upload (multi-file dropzone) -->
+            <!-- Deliverables Upload -->
             <div class="border border-gray-200 rounded-lg p-4">
-              <h3 class="text-sm font-medium text-gray-900 mb-2">Deliverables</h3>
-              <!-- Upload Form -->
               <%= form_with model: [:producer, @episode], local: true, multipart: true do |form| %>
-                <div data-controller="media-upload">
-                  <div class="bg-gray-50 text-center rounded-lg p-4 border-2 border-dashed border-gray-300"
-                                   data-media-upload-target="dropZone"
-                                  data-action="dragover->media-upload#preventDefaults dragenter->media-upload#highlight dragleave->media-upload#unhighlight drop->media-upload#handleDrop">
-                    <div data-media-upload-target="instructions">
-                      <p class="text-gray-700 text-sm">
-                        Drag and drop all deliverables here, or
-                        <br>
-                        <button type="button" class="ml-1 inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700" data-action="click->media-upload#openFileDialog">
-                          Browse Files
-                        </button>
-                      </p>
-                      <p class="text-gray-500 text-xs mt-1">You can select multiple files.</p>
-                    </div>
-                    <%= form.file_field :deliverables, multiple: true, class: "hidden", data: { media_upload_target: "input", action: "change->media-upload#fileSelected" } %>
-                    <div class="mt-3 space-y-2" data-media-upload-target="fileList"></div>
-                  </div>
-                </div>
-
-                <!-- Current Deliverables -->
-                <div class="mt-4">
-                  <%= turbo_frame_tag "producer_assets" do %>
-                    <%= render "producer/episodes/deliverables", episode: @episode %>
-                  <% end %>
-                </div>
-
-                <div class="flex justify-end">
-                  <%= form.submit "+ Upload Deliverables", class: "px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 mt-2" %>
+                <%= render "shared/file_upload",
+                      form: form,
+                      attachment_name: :deliverables,
+                      multiple: true,
+                      existing_files: @episode.deliverables.attachments,
+                      label_param: "deliverable_labels",
+                      section_label: "Deliverables",
+                      instructions: "Drag and drop all deliverables here, or",
+                      hint: "You can select multiple files." %>
+                
+                <div class="flex justify-end mt-4">
+                  <%= form.submit "+ Upload Deliverables", class: "px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700" %>
                 </div>
               <% end %>
             </div>
