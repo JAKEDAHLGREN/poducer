@@ -26,11 +26,6 @@ class PodcastStepsController < ApplicationController
       normalize_website_url
     end
 
-    # Add debugging
-    Rails.logger.debug "Current step: #{step}"
-    Rails.logger.debug "Podcast name: '#{@podcast.name}'"
-    Rails.logger.debug "Podcast description: '#{@podcast.description}'"
-
     # For summary step, we don't need to validate - just publish
     if step == steps.last
       @podcast.update(status: :published)
@@ -46,9 +41,6 @@ class PodcastStepsController < ApplicationController
         true # No validation for other steps
       end
 
-      Rails.logger.debug "Is valid for #{step}?: #{valid}"
-      Rails.logger.debug "Errors: #{@podcast.errors.full_messages}"
-
       if valid
         # Save the podcast at each step to preserve data (including files)
         if @podcast.save(validate: false) # Save without validation since we already validated
@@ -59,7 +51,6 @@ class PodcastStepsController < ApplicationController
       else
         # Store errors in session to survive the render
         session[:validation_errors] = @podcast.errors.full_messages
-        Rails.logger.debug "Storing errors in session: #{session[:validation_errors].inspect}"
         render step
       end
     end

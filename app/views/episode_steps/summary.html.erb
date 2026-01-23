@@ -100,7 +100,7 @@
                 form: f,
                 attachment_name: :assets,
                 multiple: true,
-                accept: "audio/*,video/*",
+                accept: "audio/*,video/*,audio/wav,audio/wave,audio/x-wav,.wav,.mp3,.m4a,.aac,.ogg,.flac,.mp4,.mov,.avi,.mkv,.webm",
                 existing_files: @episode.assets.attachments,
                 delete_url: wizard_destroy_asset_path(podcast_id: @podcast.id, episode_id: @episode.id, attachment_id: ":id"),
                 label_param: "asset_labels",

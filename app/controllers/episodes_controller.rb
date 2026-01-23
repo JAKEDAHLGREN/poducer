@@ -148,9 +148,9 @@ end
       :deliver_mov,
       :raw_audio,
       :edited_audio,
-      :assets,
       :cover_art,
-      output_formats: []
+      output_formats: [],
+      assets: []
     )
   end
 

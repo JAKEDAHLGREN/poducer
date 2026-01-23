@@ -108,8 +108,14 @@ class EpisodeStepsController < ApplicationController
     if params[:episode].present?
       filtered_params = episode_params
 
-      # Prevent blank file inputs from purging existing attachments
-      filtered_params = filtered_params.except(:assets) if filtered_params[:assets]&.all?(&:blank?)
+      # Handle assets separately - attach them explicitly rather than via assign_attributes
+      # This ensures all files are attached properly with has_many_attached
+      assets_to_attach = nil
+      if filtered_params[:assets].present?
+        assets_to_attach = filtered_params[:assets].reject(&:blank?)
+        filtered_params = filtered_params.except(:assets)
+      end
+
       filtered_params = filtered_params.except(:raw_audio) if filtered_params[:raw_audio].blank?
       filtered_params = filtered_params.except(:cover_art) if filtered_params[:cover_art].blank?
       # Clear cover art if requested
@@ -147,11 +153,18 @@ class EpisodeStepsController < ApplicationController
 
     if valid
       if @episode.save(validate: false)
+        # Attach assets explicitly (has_many_attached doesn't work well with assign_attributes)
+        if assets_to_attach.present?
+          assets_to_attach.each do |signed_id|
+            @episode.assets.attach(signed_id)
+          end
+        end
+
         # Update asset labels when provided
         # Support both formats: asset_labels[attachment_id] and asset_labels_json (filename-based)
         if params[:asset_labels].present?
           labels = params[:asset_labels].to_unsafe_h rescue params[:asset_labels]
-          
+
           # Handle filename-based labels from JSON
           if params[:asset_labels_json].present?
             begin
@@ -167,7 +180,7 @@ class EpisodeStepsController < ApplicationController
               # Ignore JSON parse errors
             end
           end
-          
+
           # Update metadata for each attachment
           Array(@episode.assets.attachments).each do |attachment|
             label_value = labels[attachment.id.to_s] || labels[attachment.blob.id.to_s]

@@ -26,12 +26,9 @@ class PodcastsController < ApplicationController
 
   def create
     @podcast = Podcast.new(podcast_params.merge(user: Current.user, status: :draft))
-    Rails.logger.debug "Saving podcast: #{@podcast.inspect}"
     if @podcast.save
-      Rails.logger.debug "Podcast saved successfully, redirecting to wizard"
       redirect_to podcast_wizard_path(@podcast.id, :overview), notice: "Started creating your podcast."
     else
-      Rails.logger.debug "Podcast save failed: #{@podcast.errors.full_messages.join(', ')}"
       render :new
     end
   end

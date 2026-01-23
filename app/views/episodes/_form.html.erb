@@ -18,47 +18,6 @@
           <p class="mt-1 text-sm text-red-600"><%= @episode.errors[:number].join(", ") %></p>
         <% end %>
       </div>
-
-      <!-- Cover Art Section -->
-      <div class="col-span-2 mb-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-3">Cover Art</h3>
-        <div class="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-300">
-          <% if @episode.persisted? && @episode.cover_art.attached? %>
-            <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center">
-                <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden mr-3">
-                  <%= image_tag @episode.cover_art, class: "w-full h-full object-cover" %>
-                </div>
-                <span class="text-sm font-medium text-gray-900"><%= @episode.cover_art.filename %></span>
-              </div>
-              <%= link_to "Download", rails_blob_path(@episode.cover_art, disposition: "attachment"), class: "text-orange-600 hover:text-orange-700 text-sm font-medium" %>
-            </div>
-          <% elsif @podcast.cover_art.attached? %>
-            <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center">
-                <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden mr-3">
-                  <%= image_tag @podcast.cover_art, class: "w-full h-full object-cover" %>
-                </div>
-                <div>
-                  <span class="text-sm font-medium text-gray-900">Using podcast cover art</span>
-                  <p class="text-xs text-gray-500">No episode cover uploaded. The podcast cover will be used.</p>
-                </div>
-              </div>
-            </div>
-          <% end %>
-          <%= form.file_field :cover_art, accept: "image/*", class: "w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" %>
-          <p class="mt-2 text-xs text-gray-500">
-            <% if @episode.persisted? %>
-              Upload or replace the cover image for this episode
-            <% else %>
-              Upload a cover image for this episode
-            <% end %>
-          </p>
-          <% if @episode.errors[:cover_art].any? %>
-            <p class="mt-2 text-sm text-red-600"><%= @episode.errors[:cover_art].first %></p>
-          <% end %>
-        </div>
-      </div>
     </div>
 
     <div class="mt-6">
@@ -105,62 +64,64 @@
     </div>
   </div>
 
-  <!-- Audio Files Section -->
+  <!-- Cover Art Section -->
   <div class="mb-8">
-    <h2 class="text-xl font-semibold text-gray-900 mb-4">Audio Files</h2>
+    <%
+      # Show podcast cover art as fallback hint if no episode cover
+      fallback_hint = if !@episode.cover_art.attached? && @podcast.cover_art.attached?
+        "No episode cover uploaded. The podcast cover will be used as fallback."
+      else
+        "PNG, JPG, or WEBP. Max 5MB."
+      end
+    %>
+    <%= render "shared/file_upload",
+          form: form,
+          attachment_name: :cover_art,
+          multiple: false,
+          accept: "image/png,image/jpeg,image/webp",
+          max_size_mb: 5,
+          existing_files: @episode.cover_art.attached? ? [@episode.cover_art] : [],
+          label_param: "cover_art_labels",
+          section_label: "Cover Art",
+          instructions: "Drag and drop your cover image here, or",
+          hint: fallback_hint %>
+    <%= hidden_field_tag "episode[remove_cover_art]", "0", id: "episode_remove_cover_art" %>
+    <% if @episode.errors[:cover_art].any? %>
+      <p class="mt-2 text-sm text-red-600"><%= @episode.errors[:cover_art].first %></p>
+    <% end %>
+  </div>
 
-    <!-- Raw Audio -->
-    <div class="mb-6">
-      <h3 class="text-lg font-medium text-gray-900 mb-3">Raw Audio</h3>
-      <div class="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-300">
-        <% if @episode.persisted? && @episode.raw_audio.attached? %>
-          <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center">
-              <svg class="w-8 h-8 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-              </svg>
-              <span class="text-sm font-medium text-gray-900"><%= @episode.raw_audio.filename %></span>
-            </div>
-            <%= link_to "Download", rails_blob_path(@episode.raw_audio, disposition: "attachment"), class: "text-orange-600 hover:text-orange-700 text-sm font-medium" %>
-          </div>
-        <% end %>
-        <%= form.file_field :raw_audio, accept: "audio/*", class: "w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" %>
-        <p class="mt-2 text-xs text-gray-500">
-          <% if @episode.persisted? %>
-            Upload or replace the raw audio file for this episode
-          <% else %>
-            Upload the raw audio file for this episode
-          <% end %>
-        </p>
-      </div>
-    </div>
+  <!-- Raw Audio Section -->
+  <div class="mb-8">
+    <%= render "shared/file_upload",
+          form: form,
+          attachment_name: :raw_audio,
+          multiple: false,
+          accept: "audio/*,audio/wav,audio/wave,audio/x-wav,.wav,.mp3,.m4a,.aac,.ogg,.flac",
+          max_size_mb: 500,
+          existing_files: @episode.raw_audio.attached? ? [@episode.raw_audio] : [],
+          label_param: "raw_audio_labels",
+          section_label: "Raw Audio",
+          instructions: "Drag and drop your raw audio file here, or",
+          hint: "MP3, WAV, M4A, or other audio formats. Max 500MB." %>
+    <%= hidden_field_tag "episode[remove_raw_audio]", "0", id: "episode_remove_raw_audio" %>
+  </div>
 
-    <!-- Additional Assets -->
-    <div>
-      <h3 class="text-lg font-medium text-gray-900 mb-3">Additional Assets</h3>
-      <div class="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-300">
-        <% if @episode.persisted? && @episode.assets.attached? %>
-          <div class="mb-3">
-            <h4 class="text-sm font-medium text-gray-900 mb-2">Current Assets (<%= @episode.assets.count %>)</h4>
-            <div class="space-y-2">
-              <% @episode.assets.each do |asset| %>
-                <div class="flex items-center justify-between bg-white p-2 rounded border">
-                  <div class="flex items-center">
-                    <svg class="w-5 h-5 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
-                    </svg>
-                    <span class="text-sm text-gray-600"><%= asset.filename %></span>
-                  </div>
-                  <%= link_to "Download", rails_blob_path(asset, disposition: "attachment"), class: "text-orange-600 hover:text-orange-700 text-sm font-medium" %>
-                </div>
-              <% end %>
-            </div>
-          </div>
-        <% end %>
-        <%= form.file_field :assets, multiple: true, class: "w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" %>
-        <p class="mt-2 text-xs text-gray-500">Upload additional files like show notes, transcripts, or images</p>
-      </div>
-    </div>
+  <!-- Additional Assets Section -->
+  <div class="mb-8">
+    <% delete_url = @episode.persisted? ? podcast_episode_wizard_upload_asset_path(@podcast, @episode, "assets", attachment_id: ":id") : nil %>
+    <%= render "shared/file_upload",
+          form: form,
+          attachment_name: :assets,
+          multiple: true,
+          accept: "audio/*,video/*,audio/wav,audio/wave,audio/x-wav,.wav,.mp3,.m4a,.aac,.ogg,.flac,.mp4,.mov,.avi,.mkv,.webm",
+          max_size_mb: 500,
+          existing_files: @episode.assets.attachments,
+          delete_url: delete_url,
+          label_param: "asset_labels",
+          section_label: "Additional Assets",
+          instructions: "Drag and drop additional files here, or",
+          hint: "Upload show notes, transcripts, images, or other supporting files." %>
   </div>
 
   <!-- Form Actions -->
@@ -169,12 +130,12 @@
       <%= link_to podcast_episode_path(@podcast, @episode), class: "flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200" do %>
         Cancel
       <% end %>
-      <%= form.submit "Update Episode", class: "flex-1 bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200" %>
+      <%= form.submit "Update Episode", class: "flex-1 bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200 cursor-pointer" %>
     <% else %>
       <%= link_to podcast_episodes_path(@podcast), class: "flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200" do %>
         Cancel
       <% end %>
-      <%= form.submit "Create Episode", class: "flex-1 bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200" %>
+      <%= form.submit "Create Episode", class: "flex-1 bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors duration-200 cursor-pointer" %>
     <% end %>
   </div>
 <% end %>
