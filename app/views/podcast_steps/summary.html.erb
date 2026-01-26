@@ -65,55 +65,55 @@
             </div>
           </div>
 
-        <!-- Website -->
-        <div class="border-b border-gray-200 pb-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Website</h3>
+          <!-- Website -->
+          <div class="border-b border-gray-200 pb-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Website</h3>
 
-          <div class="field">
-            <%= f.label :website_url, "Website (optional)", class: "block text-sm font-medium text-black" %>
-            <%= f.text_field :website_url, placeholder: "www.example.com", class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
-            <p class="mt-1 text-xs text-gray-500">Enter your website URL (we'll automatically add https:// if needed)</p>
+            <div class="field">
+              <%= f.label :website_url, "Website (optional)", class: "block text-sm font-medium text-black" %>
+              <%= f.text_field :website_url, placeholder: "www.example.com", class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
+              <p class="mt-1 text-xs text-gray-500">Enter your website URL (we'll automatically add https:// if needed)</p>
+            </div>
+          </div>
+
+          <!-- Categories -->
+          <div class="pb-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Categories</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="field">
+                <%= f.label :primary_category, "Primary Category", class: "block text-sm font-medium text-black" %>
+                <%= f.select :primary_category, options_for_select(Podcast::CATEGORIES.map { |c| [c, c] }, @podcast.primary_category), { prompt: "Select a category" }, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
+              </div>
+
+              <div class="field">
+                <%= f.label :secondary_category, "Secondary Category", class: "block text-sm font-medium text-black" %>
+                <%= f.select :secondary_category, options_for_select(Podcast::CATEGORIES.map { |c| [c, c] }, @podcast.secondary_category), { include_blank: "(optional)" }, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
+              </div>
+
+              <div class="field">
+                <%= f.label :tertiary_category, "Tertiary Category", class: "block text-sm font-medium text-black" %>
+                <%= f.select :tertiary_category, options_for_select(Podcast::CATEGORIES.map { |c| [c, c] }, @podcast.tertiary_category), { include_blank: "(optional)" }, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
+              </div>
+
+              <div class="field">
+                <%= f.label :episode_type, class: "block text-sm font-medium text-black" %>
+                <%= f.select :episode_type, options_for_select(episode_type_options, @podcast.episode_type), { include_blank: "Please select a type" }, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
+              </div>
+
+              <div class="field">
+                <%= f.label :explicit, class: "block text-sm font-medium text-black" %>
+                <label class="inline-flex items-center space-x-2 mt-2">
+                  <%= f.check_box :explicit, {class: "h-4 w-4 rounded-full border-gray-300 text-orange-600 focus:ring-orange-500"}, true, false %>
+                  <span class="text-sm text-gray-700">Explicit content</span>
+                </label>
+              </div>
+
+            </div>
           </div>
         </div>
 
-        <!-- Categories -->
-        <div class="pb-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Categories</h3>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="field">
-              <%= f.label :primary_category, "Primary Category", class: "block text-sm font-medium text-black" %>
-              <%= f.select :primary_category, options_for_select(Podcast::CATEGORIES.map { |c| [c, c] }, @podcast.primary_category), { prompt: "Select a category" }, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
-            </div>
-
-            <div class="field">
-              <%= f.label :secondary_category, "Secondary Category", class: "block text-sm font-medium text-black" %>
-              <%= f.select :secondary_category, options_for_select(Podcast::CATEGORIES.map { |c| [c, c] }, @podcast.secondary_category), { include_blank: "(optional)" }, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
-            </div>
-
-            <div class="field">
-              <%= f.label :tertiary_category, "Tertiary Category", class: "block text-sm font-medium text-black" %>
-              <%= f.select :tertiary_category, options_for_select(Podcast::CATEGORIES.map { |c| [c, c] }, @podcast.tertiary_category), { include_blank: "(optional)" }, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
-            </div>
-
-            <div class="field">
-              <%= f.label :episode_type, class: "block text-sm font-medium text-black" %>
-              <%= f.select :episode_type, options_for_select(episode_type_options, @podcast.episode_type), { include_blank: "Please select a type" }, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" %>
-            </div>
-
-            <div class="field">
-              <%= f.label :explicit, class: "block text-sm font-medium text-black" %>
-              <label class="inline-flex items-center space-x-2 mt-2">
-                <%= f.check_box :explicit, {class: "h-4 w-4 rounded-full border-gray-300 text-orange-600 focus:ring-orange-500"}, true, false %>
-                <span class="text-sm text-gray-700">Explicit content</span>
-              </label>
-            </div>
-
-          </div>
-        </div>
+        <%= render "podcast_steps/pagination", f: f, step: step %>
       </div>
-
-      <%= render "podcast_steps/pagination", f: f, step: step %>
     </div>
-  </div>
-<% end %>
+  <% end %>

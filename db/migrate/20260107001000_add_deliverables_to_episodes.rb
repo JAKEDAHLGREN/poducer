@@ -5,5 +5,3 @@ class AddDeliverablesToEpisodes < ActiveRecord::Migration[8.0]
     add_column :episodes, :deliver_mov, :boolean, default: false, null: false
   end
 end
-
-

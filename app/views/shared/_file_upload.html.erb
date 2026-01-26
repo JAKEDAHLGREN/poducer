@@ -1,10 +1,10 @@
 <%#
   Reusable file upload component with drag-and-drop, labels, and side-by-side layout
-  
+
   Required locals:
     - form: The form builder object
     - attachment_name: The ActiveStorage attachment name (e.g., :assets, :cover_art, :deliverables)
-  
+
   Optional locals:
     - multiple: Boolean, default false (single file mode)
     - accept: String, file type restrictions (e.g., "image/*", "audio/*,video/*")
@@ -27,7 +27,7 @@
   section_label = local_assigns.fetch(:section_label, attachment_name.to_s.humanize)
   instructions = local_assigns[:instructions] || "Drag and drop files here, or"
   hint = local_assigns[:hint]
-  
+
   # Prepare existing files data for Stimulus
   existing_files_data = existing_files.map do |file|
     {
@@ -48,53 +48,53 @@
      data-file-upload-label-param-value="<%= label_param %>"
      data-file-upload-delete-url-value="<%= delete_url %>"
      data-file-upload-existing-files-value="<%= existing_files_data.to_json %>">
-  
+
   <% if section_label.present? %>
     <h3 class="text-lg font-medium text-gray-900"><%= section_label %></h3>
   <% end %>
-  
+
   <div class="flex gap-6">
     <!-- Left: Dropzone -->
     <div class="flex-1">
       <div class="bg-gray-50 rounded-lg p-6 border-2 border-dashed border-gray-300 text-center hover:border-gray-400 transition-colors min-h-[200px] flex items-center justify-center"
            data-file-upload-target="dropZone"
            data-action="dragover->file-upload#preventDefaults dragenter->file-upload#highlight dragleave->file-upload#unhighlight drop->file-upload#handleDrop">
-        
+
         <div data-file-upload-target="instructions">
           <div class="mb-3">
             <svg class="mx-auto h-10 w-10 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
               <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </div>
-          
+
           <p class="text-gray-700 text-sm">
             <%= instructions %>
             <br>
-            <button type="button" 
+            <button type="button"
                     class="inline-flex items-center px-4 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 mt-2"
                     data-action="click->file-upload#openFileDialog">
               Browse Files
             </button>
           </p>
-          
+
           <% if hint %>
             <p class="text-gray-500 text-xs mt-1"><%= hint %></p>
           <% end %>
         </div>
-        
+
         <!-- Hidden file input -->
         <%= form.file_field attachment_name,
               direct_upload: true,
               multiple: multiple,
               accept: accept,
               class: "hidden",
-              data: { 
+              data: {
                 file_upload_target: "input",
                 action: "change->file-upload#fileSelected"
               } %>
       </div>
     </div>
-    
+
     <!-- Right: File List -->
     <div class="flex-1">
       <div class="bg-white rounded-lg border border-gray-200 p-4 min-h-[200px]">
@@ -104,7 +104,7 @@
             (<%= existing_files.count %>)
           </span>
         </h4>
-        
+
         <div class="space-y-2 max-h-96 overflow-y-auto" data-file-upload-target="fileList">
           <% if existing_files.any? %>
             <% existing_files.each do |file| %>

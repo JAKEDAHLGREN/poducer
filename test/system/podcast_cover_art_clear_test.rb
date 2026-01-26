@@ -66,5 +66,3 @@ class PodcastCoverArtClearTest < ApplicationSystemTestCase
     assert_not @podcast.cover_art.attached?
   end
 end
-
-
