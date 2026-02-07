@@ -54,7 +54,7 @@ class Producer::EpisodesControllerTest < ActionDispatch::IntegrationTest
   test "upload_assets attaches deliverables" do
     @episode.update!(status: :editing)
     file = fixture_file_upload("test_audio.wav", "audio/mpeg")
-    patch upload_assets_producer_episode_url(@episode), params: { files: [file] }
+    patch upload_assets_producer_episode_url(@episode), params: { files: [ file ] }
     assert @episode.reload.deliverables.attached?
   end
 

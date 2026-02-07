@@ -103,7 +103,7 @@ class EpisodeTest < ActiveSupport::TestCase
 
   test "output_formats_list parses comma-separated string" do
     @episode.output_formats = "MP3 128kbps, WAV, FLAC"
-    assert_equal ["MP3 128kbps", "WAV", "FLAC"], @episode.output_formats_list
+    assert_equal [ "MP3 128kbps", "WAV", "FLAC" ], @episode.output_formats_list
   end
 
   test "output_formats_list returns empty array when blank" do
@@ -115,12 +115,12 @@ class EpisodeTest < ActiveSupport::TestCase
   end
 
   test "output_formats_list= joins array into comma-separated string" do
-    @episode.output_formats_list = ["MP3 128kbps", "WAV"]
+    @episode.output_formats_list = [ "MP3 128kbps", "WAV" ]
     assert_equal "MP3 128kbps,WAV", @episode.output_formats
   end
 
   test "output_formats_list= strips whitespace and rejects blanks" do
-    @episode.output_formats_list = [" MP3 128kbps ", "", " WAV ", nil]
+    @episode.output_formats_list = [ " MP3 128kbps ", "", " WAV ", nil ]
     assert_equal "MP3 128kbps,WAV", @episode.output_formats
   end
 
