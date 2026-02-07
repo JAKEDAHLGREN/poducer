@@ -85,6 +85,45 @@ class EpisodesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "draft", @episode.reload.status
   end
 
+  # === Authorization Tests ===
+
+  test "non-owner redirected from show" do
+    sign_in_as(users(:two))
+    get podcast_episode_url(@podcast, @episode)
+    assert_redirected_to podcast_episodes_url(@podcast)
+  end
+
+  test "non-owner redirected from edit" do
+    sign_in_as(users(:two))
+    get edit_podcast_episode_url(@podcast, @episode)
+    assert_redirected_to podcast_episodes_url(@podcast)
+  end
+
+  test "non-owner redirected from destroy" do
+    sign_in_as(users(:two))
+    assert_no_difference("Episode.count") do
+      delete podcast_episode_url(@podcast, @episode)
+    end
+    assert_redirected_to podcast_episodes_url(@podcast)
+  end
+
+  test "admin can access any episode" do
+    admin = users(:two)
+    admin.update!(role: :admin)
+    sign_in_as(admin)
+    get podcast_episode_url(@podcast, @episode)
+    assert_response :success
+  end
+
+  test "start_wizard creates a draft episode with next number" do
+    assert_difference("Episode.count", 1) do
+      post start_wizard_podcast_episodes_url(@podcast)
+    end
+    new_episode = Episode.order(:id).last
+    assert new_episode.draft?
+    assert new_episode.number > 0
+  end
+
   test "re_submit sends episode back to edit_requested" do
     # Move to awaiting_user_review
     patch submit_episode_podcast_episode_url(@podcast, @episode)

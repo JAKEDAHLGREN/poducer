@@ -2,7 +2,7 @@ class Producer::EpisodesController < ApplicationController
   include FileAttachable
 
   before_action :ensure_producer
-  before_action :set_episode, only: [ :show, :start_editing, :complete_editing, :update ]
+  before_action :set_episode, only: [ :show, :start_editing, :complete_editing, :update, :upload_assets ]
 
   def index
     @episodes = Episode.includes(:podcast, podcast: :user).where(status: [ :edit_requested, :editing, :awaiting_user_review, :ready_to_publish ]).order(updated_at: :desc)
@@ -37,7 +37,7 @@ class Producer::EpisodesController < ApplicationController
 
   def complete_editing
     # Allow submission if producer uploaded at least one deliverable or an edited audio file
-    unless (@episode.deliverables.attached? || @episode.edited_audio.attached?)
+    unless @episode.deliverables.attached? || @episode.edited_audio.attached?
       return redirect_to producer_episode_path(@episode), alert: "Please upload at least one deliverable before submitting for review."
     end
 

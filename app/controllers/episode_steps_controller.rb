@@ -115,7 +115,7 @@ class EpisodeStepsController < ApplicationController
   end
 
   def filter_and_extract_params
-    return [nil, nil] unless params[:episode].present?
+    return [ nil, nil ] unless params[:episode].present?
 
     filtered = episode_params
     assets = nil
@@ -145,7 +145,7 @@ class EpisodeStepsController < ApplicationController
       filtered[:output_formats] = filtered[:output_formats].reject(&:blank?).join(",")
     end
 
-    [filtered, assets]
+    [ filtered, assets ]
   end
 
   def auto_assign_episode_number
