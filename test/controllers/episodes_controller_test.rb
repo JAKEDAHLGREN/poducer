@@ -64,6 +64,8 @@ class EpisodesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to podcast_episode_url(@podcast, @episode)
     assert_equal "editing", @episode.reload.status
 
+    @episode.edited_audio.attach(io: StringIO.new("fake audio"), filename: "edited.mp3", content_type: "audio/mpeg")
+
     patch complete_editing_podcast_episode_url(@podcast, @episode)
     assert_redirected_to podcast_episode_url(@podcast, @episode)
     assert_equal "awaiting_user_review", @episode.reload.status
@@ -87,6 +89,7 @@ class EpisodesControllerTest < ActionDispatch::IntegrationTest
     # Move to awaiting_user_review
     patch submit_episode_podcast_episode_url(@podcast, @episode)
     patch start_editing_podcast_episode_url(@podcast, @episode)
+    @episode.edited_audio.attach(io: StringIO.new("fake audio"), filename: "edited.mp3", content_type: "audio/mpeg")
     patch complete_editing_podcast_episode_url(@podcast, @episode)
     assert_equal "awaiting_user_review", @episode.reload.status
 

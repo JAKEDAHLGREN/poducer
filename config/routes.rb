@@ -44,11 +44,9 @@ Rails.application.routes.draw do
     resources :wizard, only: [ :show, :update ], controller: "podcast_steps"
   end
 
-# Explicit route to remove an uploaded episode asset from the wizard (supports DELETE and fallback GET)
-match "/podcasts/:podcast_id/episodes/:episode_id/wizard/uploads/assets/:attachment_id",
-      to: "episode_steps#destroy_asset",
-      as: :wizard_destroy_asset,
-      via: [ :delete, :get ]
+  delete "/podcasts/:podcast_id/episodes/:episode_id/wizard/uploads/assets/:attachment_id",
+         to: "episode_steps#destroy_asset",
+         as: :wizard_destroy_asset
 
   resources :dashboards, only: [ :index ]
   get "sign_in", to: "sessions#new"

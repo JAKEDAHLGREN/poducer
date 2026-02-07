@@ -7,6 +7,7 @@
 
   Optional locals:
     - multiple: Boolean, default false (single file mode)
+    - allow_new_uploads: Boolean, default true. When false, hide the dropzone (review-only / no new files).
     - accept: String, file type restrictions (e.g., "image/*", "audio/*,video/*")
     - max_size_mb: Number, maximum file size in MB
     - existing_files: Array of existing file objects (ActiveStorage attachments or hash with id, filename, etc.)
@@ -19,6 +20,7 @@
 <%
   attachment_name = local_assigns[:attachment_name] || :files
   multiple = local_assigns.fetch(:multiple, false)
+  allow_new_uploads = local_assigns.fetch(:allow_new_uploads, true)
   accept = local_assigns[:accept]
   max_size_mb = local_assigns[:max_size_mb]
   existing_files = local_assigns[:existing_files] || []
@@ -28,14 +30,26 @@
   instructions = local_assigns[:instructions] || "Drag and drop files here, or"
   hint = local_assigns[:hint]
 
-  # Prepare existing files data for Stimulus
+  # Resolve label from file (blob metadata or Attached::One's blob)
+  label_for = ->(file) {
+    if file.respond_to?(:metadata) && file.metadata.is_a?(Hash)
+      file.metadata["label"].to_s
+    elsif file.respond_to?(:blob) && file.blob.respond_to?(:metadata)
+      file.blob.metadata["label"].to_s
+    else
+      (file[:label] || "").to_s
+    end
+  }
+
+  # Prepare existing files data for Stimulus (use blob.id for Attached::One so label lookup works)
   existing_files_data = existing_files.map do |file|
+    file_id = file.respond_to?(:id) ? file.id : (file.respond_to?(:blob) ? file.blob&.id : nil) || file[:id]
     {
-      id: file.respond_to?(:id) ? file.id : file[:id],
+      id: file_id,
       filename: file.respond_to?(:filename) ? file.filename.to_s : file[:filename],
       size: file.respond_to?(:byte_size) ? file.byte_size : file[:size],
       content_type: file.respond_to?(:content_type) ? file.content_type : file[:content_type],
-      label: file.respond_to?(:metadata) ? (file.metadata["label"] || "") : (file[:label] || "")
+      label: label_for.call(file)
     }
   end
 %>
@@ -54,7 +68,8 @@
   <% end %>
 
   <div class="flex gap-6">
-    <!-- Left: Dropzone -->
+    <!-- Left: Dropzone (hidden when allow_new_uploads is false) -->
+    <% if allow_new_uploads %>
     <div class="flex-1">
       <div class="bg-gray-50 rounded-lg p-6 border-2 border-dashed border-gray-300 text-center hover:border-gray-400 transition-colors min-h-[200px] flex items-center justify-center"
            data-file-upload-target="dropZone"
@@ -94,9 +109,10 @@
               } %>
       </div>
     </div>
+    <% end %>
 
     <!-- Right: File List -->
-    <div class="flex-1">
+    <div class="<%= allow_new_uploads ? 'flex-1' : 'flex-1 max-w-2xl' %>">
       <div class="bg-white rounded-lg border border-gray-200 p-4 min-h-[200px]">
         <h4 class="text-sm font-medium text-gray-900 mb-3">
           Uploaded Files
@@ -108,6 +124,7 @@
         <div class="space-y-2 max-h-96 overflow-y-auto" data-file-upload-target="fileList">
           <% if existing_files.any? %>
             <% existing_files.each do |file| %>
+              <% file_id = file.respond_to?(:id) ? file.id : (file.respond_to?(:blob) ? file.blob&.id : nil) || file[:id] %>
               <div class="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg">
                 <div class="flex-1 flex items-center gap-3 min-w-0">
                   <span class="text-lg flex-shrink-0">
@@ -129,8 +146,8 @@
                 <div class="flex items-center gap-2 flex-shrink-0">
                   <input
                     type="text"
-                    name="<%= label_param %>[<%= file.respond_to?(:id) ? file.id : file[:id] %>]"
-                    value="<%= file.respond_to?(:metadata) ? (file.metadata["label"] || "") : (file[:label] || "") %>"
+                    name="<%= label_param %>[<%= file_id %>]"
+                    value="<%= label_for.call(file) %>"
                     placeholder="Label (optional)"
                     class="w-48 rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm"
                     autocomplete="off"
@@ -140,7 +157,7 @@
                     type="button"
                     class="text-red-600 hover:text-red-700 p-1 text-xl font-bold leading-none"
                     data-action="click->file-upload#removeFileClick"
-                    data-file-id="<%= file.respond_to?(:id) ? file.id : file[:id] %>"
+                    data-file-id="<%= file_id %>"
                     title="Remove file"
                   >
                     ×

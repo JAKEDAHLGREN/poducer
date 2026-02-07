@@ -1,5 +1,8 @@
 class EpisodeStepsController < ApplicationController
   include Wicked::Wizard
+  include SetPodcastAndEpisode
+  include FileAttachable
+  include EpisodeLabelable
   steps :overview, :assets, :details, :summary
 
   before_action :set_podcast
@@ -14,35 +17,17 @@ class EpisodeStepsController < ApplicationController
 
   # PATCH /podcasts/:podcast_id/episodes/:episode_id/wizard/assets
   def assets
-    # Accept either files[] or single file (some browsers/controllers may send 'file')
-    incoming = params[:files].presence || params[:file].presence
-    unless incoming
-      respond_to do |format|
-        format.json { render json: { error: "No files provided" }, status: :unprocessable_entity }
-        format.turbo_stream { head :unprocessable_entity }
-      end
-      return
-    end
-    Array(incoming).each do |file|
-      @episode.assets.attach(file)
-    end
-    respond_to do |format|
-      format.json { render json: { ok: true, count: @episode.assets.count }, status: :ok }
-      format.turbo_stream do
-        render turbo_stream: [
-          turbo_stream.replace(
-            "current_assets",
-            partial: "episode_steps/current_assets",
-            locals: { episode: @episode }
-          ),
-          turbo_stream.replace(
-            "summary_assets",
-            partial: "episode_steps/summary_assets",
-            locals: { episode: @episode, podcast: @podcast }
-          )
-        ]
-      end
-      format.html { redirect_to podcast_episode_wizard_path(@podcast, @episode, :summary), notice: "Assets uploaded." }
+    attach_files(@episode, :assets,
+      success_redirect: podcast_episode_wizard_path(@podcast, @episode, :summary)
+    ) do
+      render turbo_stream: [
+        turbo_stream.replace("current_assets",
+          partial: "episode_steps/current_assets",
+          locals: { episode: @episode }),
+        turbo_stream.replace("summary_assets",
+          partial: "episode_steps/summary_assets",
+          locals: { episode: @episode, podcast: @podcast })
+      ]
     end
   end
 
@@ -103,102 +88,17 @@ class EpisodeStepsController < ApplicationController
   def update
     session.delete(:validation_errors)
 
-    # (reverted) no JSON upload handling here
+    filtered_params, assets_to_attach = filter_and_extract_params
+    @episode.assign_attributes(filtered_params) if filtered_params.present?
 
-    if params[:episode].present?
-      filtered_params = episode_params
+    auto_assign_episode_number
 
-      # Handle assets separately - attach them explicitly rather than via assign_attributes
-      # This ensures all files are attached properly with has_many_attached
-      assets_to_attach = nil
-      if filtered_params[:assets].present?
-        assets_to_attach = filtered_params[:assets].reject(&:blank?)
-        filtered_params = filtered_params.except(:assets)
-      end
-
-      filtered_params = filtered_params.except(:raw_audio) if filtered_params[:raw_audio].blank?
-      filtered_params = filtered_params.except(:cover_art) if filtered_params[:cover_art].blank?
-      # Clear cover art if requested
-      if params[:episode][:remove_cover_art].to_s == "1"
-        @episode.cover_art.purge_later if @episode.cover_art.attached?
-      end
-      # Preserve existing episode number if the user leaves it blank
-      filtered_params = filtered_params.except(:number) if filtered_params.key?(:number) && filtered_params[:number].to_s.strip.blank?
-      # Join output formats array into a comma-separated string for storage
-      if filtered_params[:output_formats].is_a?(Array)
-        filtered_params[:output_formats] = filtered_params[:output_formats].reject(&:blank?).join(",")
-      end
-
-      @episode.assign_attributes(filtered_params) if filtered_params.present?
-    end
-
-    # Auto-assign the next available episode number on finalization if missing
-    if step == :summary && @episode.number.blank?
-      next_number = (@podcast.episodes.where.not(id: @episode.id).maximum(:number) || 0) + 1
-      @episode.number = next_number
-    end
-
-    valid =
-      case step
-      when :overview
-        @episode.valid?(:overview_step)
-      when :details
-        @episode.valid?(:details_step)
-      when :summary
-        # On summary, ensure required fields from earlier steps are valid
-        @episode.valid?(:overview_step) & @episode.valid?(:details_step)
-      else
-        true
-      end
-
-    if valid
+    if valid_for_current_step?
       if @episode.save(validate: false)
-        # Attach assets explicitly (has_many_attached doesn't work well with assign_attributes)
-        if assets_to_attach.present?
-          assets_to_attach.each do |signed_id|
-            @episode.assets.attach(signed_id)
-          end
-        end
-
-        # Update asset labels when provided
-        # Support both formats: asset_labels[attachment_id] and asset_labels_json (filename-based)
-        if params[:asset_labels].present?
-          labels = params[:asset_labels].to_unsafe_h rescue params[:asset_labels]
-
-          # Handle filename-based labels from JSON
-          if params[:asset_labels_json].present?
-            begin
-              filename_labels = JSON.parse(params[:asset_labels_json])
-              # Match labels by filename
-              @episode.assets.attachments.each do |attachment|
-                filename = attachment.filename.to_s
-                if filename_labels[filename].present?
-                  labels[attachment.id.to_s] = filename_labels[filename]
-                end
-              end
-            rescue JSON::ParserError
-              # Ignore JSON parse errors
-            end
-          end
-
-          # Update metadata for each attachment
-          Array(@episode.assets.attachments).each do |attachment|
-            label_value = labels[attachment.id.to_s] || labels[attachment.blob.id.to_s]
-            next if label_value.blank?
-            begin
-              new_metadata = attachment.blob.metadata.merge("label" => label_value.to_s.strip)
-              attachment.blob.update!(metadata: new_metadata)
-            rescue => _
-              # Silently ignore metadata update errors for now
-            end
-          end
-        end
-
-        if step == steps.last
-          redirect_to_finish_wizard
-        else
-          redirect_to next_wizard_path
-        end
+        attach_pending_assets(assets_to_attach)
+        process_episode_asset_labels(@episode)
+        process_episode_cover_art_label(@episode)
+        navigate_after_update
       else
         render step
       end
@@ -210,16 +110,72 @@ class EpisodeStepsController < ApplicationController
 
   private
 
-  def set_podcast
-    @podcast = Podcast.find(params[:podcast_id])
-  end
-
-  def set_episode
-    @episode = @podcast.episodes.find(params[:episode_id])
-  end
-
   def set_steps
     @steps = steps
+  end
+
+  def filter_and_extract_params
+    return [nil, nil] unless params[:episode].present?
+
+    filtered = episode_params
+    assets = nil
+
+    # Extract assets for separate attachment (has_many_attached doesn't work well with assign_attributes)
+    if filtered[:assets].present?
+      assets = filtered[:assets].reject(&:blank?)
+      filtered = filtered.except(:assets)
+    end
+
+    # Don't overwrite existing files with blank params
+    filtered = filtered.except(:raw_audio) if filtered[:raw_audio].blank?
+    filtered = filtered.except(:cover_art) if filtered[:cover_art].blank?
+
+    # Clear cover art if removal was requested
+    if params[:episode][:remove_cover_art].to_s == "1"
+      @episode.cover_art.purge_later if @episode.cover_art.attached?
+    end
+
+    # Preserve existing episode number if left blank
+    if filtered.key?(:number) && filtered[:number].to_s.strip.blank?
+      filtered = filtered.except(:number)
+    end
+
+    # Join output formats array into comma-separated string for storage
+    if filtered[:output_formats].is_a?(Array)
+      filtered[:output_formats] = filtered[:output_formats].reject(&:blank?).join(",")
+    end
+
+    [filtered, assets]
+  end
+
+  def auto_assign_episode_number
+    return unless step == :summary && @episode.number.blank?
+
+    next_number = (@podcast.episodes.where.not(id: @episode.id).maximum(:number) || 0) + 1
+    @episode.number = next_number
+  end
+
+  def valid_for_current_step?
+    case step
+    when :overview then @episode.valid?(:overview_step)
+    when :details  then @episode.valid?(:details_step)
+    when :summary  then @episode.valid?(:overview_step) & @episode.valid?(:details_step)
+    else true
+    end
+  end
+
+  def attach_pending_assets(assets)
+    return unless assets.present?
+
+    assets.each { |signed_id| @episode.assets.attach(signed_id) }
+  end
+
+  def navigate_after_update
+    if step == steps.last
+      redirect_to_finish_wizard
+    else
+      redirect_to next_wizard_path
+    end
   end
 
   def episode_params
