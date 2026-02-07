@@ -3,8 +3,10 @@ require "application_system_test_case"
 class PodcastCoverArtClearTest < ApplicationSystemTestCase
   setup do
     @user = users(:lazaro_nixon)
-    # Sign in via request helper (session cookie will be set for system driver)
-    page.driver.post(sign_in_path, params: { email: @user.email, password: "Secret1*3*5*" })
+    visit sign_in_path
+    fill_in "Email", with: @user.email
+    fill_in "Password", with: "Secret1*3*5*"
+    click_button "Continue"
     # Ensure we have a podcast owned by this user
     @podcast = Podcast.create!(
       user: @user,
