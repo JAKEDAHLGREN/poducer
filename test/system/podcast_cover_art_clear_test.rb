@@ -30,8 +30,8 @@ class PodcastCoverArtClearTest < ApplicationSystemTestCase
     visit podcast_wizard_path(@podcast, :media)
 
     # Preview should be visible; click the X
-    assert_selector('button[title="Remove File"]', wait: 5)
-    find('button[title="Remove File"]').click
+    assert_selector('button[title="Remove file"]', wait: 5)
+    find('button[title="Remove file"]').click
 
     # Submit the step to persist removal
     click_button "Next"
@@ -54,8 +54,8 @@ class PodcastCoverArtClearTest < ApplicationSystemTestCase
     visit podcast_wizard_path(@podcast, :summary)
 
     # Preview should be visible; click the X
-    assert_selector('button[title="Remove File"]', wait: 5)
-    find('button[title="Remove File"]').click
+    assert_selector('button[title="Remove file"]', wait: 5)
+    find('button[title="Remove file"]').click
 
     # Persist via Finish
     if has_button?("Finish Podcast")
