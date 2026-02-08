@@ -1,12 +1,16 @@
 require "application_system_test_case"
 
 class PodcastCoverArtClearTest < ApplicationSystemTestCase
+  # Disable parallel execution for system tests to avoid database isolation issues
+  parallelize(workers: 1)
+
   setup do
     @user = users(:lazaro_nixon)
     visit sign_in_path
     fill_in "Email", with: @user.email
     fill_in "Password", with: "Secret1*3*5*"
     click_button "Continue"
+    assert_current_path podcasts_path
     # Ensure we have a podcast owned by this user
     @podcast = Podcast.create!(
       user: @user,
