@@ -22,7 +22,7 @@ class FileUploadIntegrationTest < ActionDispatch::IntegrationTest
   end
 
   teardown do
-    User.where(email: ["integration_user@example.com", "integration_producer@example.com"]).destroy_all
+    User.where(email: [ "integration_user@example.com", "integration_producer@example.com" ]).destroy_all
   end
 
   # ==================
@@ -194,7 +194,7 @@ class FileUploadIntegrationTest < ActionDispatch::IntegrationTest
 
     patch podcast_episode_wizard_path(@podcast, @episode, :assets), params: {
       episode: {
-        assets: [signed_id1, signed_id2]
+        assets: [ signed_id1, signed_id2 ]
       }
     }
 
@@ -242,7 +242,7 @@ class FileUploadIntegrationTest < ActionDispatch::IntegrationTest
     patch podcast_episode_wizard_path(@podcast, @episode, :assets), params: {
       episode: {
         cover_art: cover_signed_id,
-        assets: [asset_signed_id]
+        assets: [ asset_signed_id ]
       }
     }
 
@@ -286,7 +286,7 @@ class FileUploadIntegrationTest < ActionDispatch::IntegrationTest
 
     patch podcast_episode_path(@podcast, @episode), params: {
       episode: {
-        assets: [asset_signed_id1, asset_signed_id2]
+        assets: [ asset_signed_id1, asset_signed_id2 ]
       }
     }
 
@@ -309,7 +309,7 @@ class FileUploadIntegrationTest < ActionDispatch::IntegrationTest
 
     patch producer_episode_path(@episode), params: {
       episode: {
-        deliverables: [signed_id]
+        deliverables: [ signed_id ]
       }
     }
 
@@ -330,7 +330,7 @@ class FileUploadIntegrationTest < ActionDispatch::IntegrationTest
 
     patch producer_episode_path(@episode), params: {
       episode: {
-        deliverables: [signed_id1, signed_id2]
+        deliverables: [ signed_id1, signed_id2 ]
       }
     }
 
@@ -390,7 +390,7 @@ class FileUploadIntegrationTest < ActionDispatch::IntegrationTest
     signed_id = upload_file_via_direct_upload(@test_audio_path, "fake.wav", "audio/wav")
 
     patch producer_episode_path(@episode), params: {
-      episode: { deliverables: [signed_id] }
+      episode: { deliverables: [ signed_id ] }
     }
 
     # Should be forbidden
@@ -449,7 +449,7 @@ class FileUploadIntegrationTest < ActionDispatch::IntegrationTest
 
     patch podcast_episode_wizard_path(@podcast, @episode, :assets), params: {
       episode: {
-        assets: [signed_id]
+        assets: [ signed_id ]
       }
     }
 

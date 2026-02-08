@@ -1,4 +1,7 @@
 class EpisodesController < ApplicationController
+  include SetPodcastAndEpisode
+  include EpisodeLabelable
+
   before_action :set_podcast
   before_action :set_episode, only: [ :show, :edit, :update, :destroy, :submit_episode, :start_editing, :complete_editing, :revert_to_draft, :re_submit_for_editing, :approve_episode, :publish_episode ]
   before_action -> { authorize_resource_access(@episode) }, only: [ :show, :edit, :update, :destroy, :submit_episode, :start_editing, :complete_editing, :revert_to_draft, :re_submit_for_editing, :approve_episode, :publish_episode ]
@@ -51,6 +54,8 @@ class EpisodesController < ApplicationController
     end
 
     if @episode.update(episode_params)
+      process_episode_asset_labels(@episode)
+      process_episode_cover_art_label(@episode)
       redirect_to podcast_episode_path(@podcast, @episode), notice: "Episode was successfully updated."
     else
       render :edit, status: :unprocessable_entity
@@ -63,73 +68,60 @@ class EpisodesController < ApplicationController
   end
 
   def submit_episode
-    if @episode.submit_for_editing!
-      redirect_to podcast_episode_path(@podcast, @episode), notice: "Episode submitted for editing successfully."
-    else
-      redirect_to podcast_episode_path(@podcast, @episode), alert: "Unable to submit episode for editing."
-    end
+    perform_transition(:submit_for_editing!,
+      notice: "Episode submitted for editing successfully.",
+      alert: "Unable to submit episode for editing.")
   end
 
   def revert_to_draft
-    if @episode.revert_to_draft!
-      redirect_to podcast_episode_path(@podcast, @episode), notice: "Episode reverted to draft successfully."
-    else
-      redirect_to podcast_episode_path(@podcast, @episode), alert: "Unable to revert episode to draft."
-    end
+    perform_transition(:revert_to_draft!,
+      notice: "Episode reverted to draft successfully.",
+      alert: "Unable to revert episode to draft.")
   end
 
   def start_editing
-    if @episode.start_editing!
-      redirect_to podcast_episode_path(@podcast, @episode), notice: "Started editing episode."
-    else
-      redirect_to podcast_episode_path(@podcast, @episode), alert: "Unable to start editing episode."
-    end
+    perform_transition(:start_editing!,
+      notice: "Started editing episode.",
+      alert: "Unable to start editing episode.")
   end
 
   def complete_editing
     unless @episode.edited_audio.attached?
-      return redirect_to podcast_episode_path(@podcast, @episode), alert: "Please upload the edited audio before submitting for review."
+      return redirect_to podcast_episode_path(@podcast, @episode),
+             alert: "Please upload the edited audio before submitting for review."
     end
 
-    if @episode.complete_editing!
-      redirect_to podcast_episode_path(@podcast, @episode), notice: "Submitted edited episode for user review."
-    else
-      redirect_to podcast_episode_path(@podcast, @episode), alert: "Unable to submit edited episode."
-    end
+    perform_transition(:complete_editing!,
+      notice: "Submitted edited episode for user review.",
+      alert: "Unable to submit edited episode.")
   end
 
   def re_submit_for_editing
-    if @episode.re_submit_for_editing!
-      redirect_to podcast_episode_path(@podcast, @episode), notice: "Episode has been re-submitted for editing."
-    else
-      redirect_to podcast_episode_path(@podcast, @episode), alert: "Unable to re-submit episode for editing."
-    end
+    perform_transition(:re_submit_for_editing!,
+      notice: "Episode has been re-submitted for editing.",
+      alert: "Unable to re-submit episode for editing.")
   end
 
   def approve_episode
-    if @episode.approve_episode!
-      redirect_to podcast_episode_path(@podcast, @episode), notice: "Approved. Producer can now publish."
-    else
-      redirect_to podcast_episode_path(@podcast, @episode), alert: "Unable to approve episode."
-    end
+    perform_transition(:approve_episode!,
+      notice: "Approved. Producer can now publish.",
+      alert: "Unable to approve episode.")
   end
 
-def publish_episode
-  if @episode.publish!
-    redirect_to podcast_episode_path(@podcast, @episode), notice: "Episode published."
-  else
-    redirect_to podcast_episode_path(@podcast, @episode), alert: "Unable to publish episode."
+  def publish_episode
+    perform_transition(:publish!,
+      notice: "Episode published.",
+      alert: "Unable to publish episode.")
   end
-end
 
   private
 
-  def set_podcast
-    @podcast = Podcast.find(params[:podcast_id])
-  end
-
-  def set_episode
-    @episode = @podcast.episodes.find(params[:id])
+  def perform_transition(method, notice:, alert:)
+    if @episode.public_send(method)
+      redirect_to podcast_episode_path(@podcast, @episode), notice: notice
+    else
+      redirect_to podcast_episode_path(@podcast, @episode), alert: alert
+    end
   end
 
   def episode_params

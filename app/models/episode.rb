@@ -59,42 +59,35 @@ class Episode < ApplicationRecord
 
   # Status transition methods
   def submit_for_editing!
-    return false unless draft?
-    update!(status: :edit_requested)
+    transition!(from: :draft, to: :edit_requested)
   end
 
   def revert_to_draft!
-    return false unless edit_requested?
-    update!(status: :draft)
+    transition!(from: :edit_requested, to: :draft)
   end
 
   def start_editing!
-    return false unless edit_requested?
-    update!(status: :editing)
+    transition!(from: :edit_requested, to: :editing)
   end
 
   def complete_editing!
-    return false unless editing?
-    update!(status: :awaiting_user_review)
+    transition!(from: :editing, to: :awaiting_user_review)
   end
 
   def re_submit_for_editing!
-    return false unless awaiting_user_review?
-    update!(status: :edit_requested)
+    transition!(from: :awaiting_user_review, to: :edit_requested)
   end
 
   def approve_episode!
-    return false unless awaiting_user_review?
-    update!(status: :ready_to_publish)
+    transition!(from: :awaiting_user_review, to: :ready_to_publish)
   end
 
   def publish!
-    return false unless ready_to_publish?
-    update!(status: :episode_complete)
+    transition!(from: :ready_to_publish, to: :episode_complete)
   end
 
   def archive!
-    update!(status: :archived)
+    transition!(to: :archived)
   end
 
   # Status check methods
@@ -117,6 +110,11 @@ class Episode < ApplicationRecord
   after_update_commit :broadcast_status_change, if: :saved_change_to_status?
 
   private
+
+  def transition!(from: nil, to:)
+    return false if from && !public_send("#{from}?")
+    update!(status: to)
+  end
 
   def broadcast_status_change
     broadcast_replace_later_to self,

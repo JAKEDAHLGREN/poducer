@@ -28,6 +28,7 @@ class PodcastStepsController < ApplicationController
 
     # For summary step, we don't need to validate - just publish
     if step == steps.last
+      process_cover_art_label if params[:podcast].present?
       @podcast.update(status: :published)
       redirect_to podcasts_path, notice: "Podcast created successfully"
     else
@@ -44,6 +45,7 @@ class PodcastStepsController < ApplicationController
       if valid
         # Save the podcast at each step to preserve data (including files)
         if @podcast.save(validate: false) # Save without validation since we already validated
+          process_cover_art_label
           redirect_to next_wizard_path
         else
           render step
@@ -86,5 +88,33 @@ class PodcastStepsController < ApplicationController
 
   def finish_wizard_path
     @podcast
+  end
+
+  def process_cover_art_label
+    return unless @podcast.cover_art.attached?
+
+    labels = (params[:cover_art_labels].to_unsafe_h if params[:cover_art_labels].present?) || {}
+    blob = @podcast.cover_art.blob
+    attachment = @podcast.cover_art.attachment
+
+    # Support filename-based labels from Stimulus (cover_art_labels_json)
+    if params[:cover_art_labels_json].present?
+      begin
+        filename_labels = JSON.parse(params[:cover_art_labels_json])
+        label_from_json = filename_labels[blob.filename.to_s]
+        labels[blob.id.to_s] = label_from_json if label_from_json.present?
+      rescue JSON::ParserError
+        # Ignore JSON parse errors
+      end
+    end
+
+    label_value = labels[attachment.id.to_s].presence ||
+                  labels[blob.id.to_s].presence
+    return if label_value.blank?
+
+    new_metadata = blob.metadata.merge("label" => label_value.to_s.strip)
+    blob.update!(metadata: new_metadata)
+  rescue StandardError
+    # Silently ignore metadata update errors
   end
 end

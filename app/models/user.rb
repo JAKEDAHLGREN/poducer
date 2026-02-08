@@ -11,10 +11,6 @@ class User < ApplicationRecord
 
   attribute :role, :integer, default: 0
   enum :role, { user: 0, producer: 1, admin: 2 }
-  # TODO: Implementation plan options later
-  # enum plan: { base: 0, pro: 1, enterprise: 2 }
-
-  validates :email, presence: true, uniqueness: true
 
   # Token generation for email verification and password reset
   def generate_token_for(purpose)
