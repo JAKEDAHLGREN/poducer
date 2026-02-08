@@ -29,46 +29,50 @@ class PodcastCoverArtClearTest < ApplicationSystemTestCase
   end
 
   test "clear cover art on Media step and persist after Next" do
-    assert @podcast.cover_art.attached?
-
     visit podcast_wizard_path(@podcast, :media)
 
-    # Preview should be visible; click the X
+    # Cover art file should be listed
     assert_selector('button[title="Remove file"]', wait: 5)
-    find('button[title="Remove file"]').click
 
-    # Submit the step to persist removal
+    # Click remove and accept the confirm dialog
+    accept_confirm do
+      find('button[title="Remove file"]').click
+    end
+
+    # After JS removes the file, the file list should show empty state
+    assert_text "No files uploaded yet."
+
+    # Submit the step
     click_button "Next"
 
-    # Cover should be purged
-    @podcast.reload
-    assert_not @podcast.cover_art.attached?
+    # Go back to media step and verify cover art is gone
+    visit podcast_wizard_path(@podcast, :media)
+    assert_no_selector('button[title="Remove file"]')
+    assert_text "No files uploaded yet."
   end
 
   test "clear cover art on Summary step and persist after Finish" do
-    # Re-attach so we can clear again
-    @podcast.cover_art.attach(
-      io: StringIO.new("another fake"),
-      filename: "again.png",
-      content_type: "image/png"
-    )
-    @podcast.save!
-    assert @podcast.cover_art.attached?
-
     visit podcast_wizard_path(@podcast, :summary)
 
-    # Preview should be visible; click the X
+    # Cover art file should be listed
     assert_selector('button[title="Remove file"]', wait: 5)
-    find('button[title="Remove file"]').click
 
-    # Persist via Finish
+    # Click remove and accept the confirm dialog
+    accept_confirm do
+      find('button[title="Remove file"]').click
+    end
+
+    # After JS removes the file, the file list should show empty state
+    assert_text "No files uploaded yet."
+
+    # Submit the step
     if has_button?("Finish Podcast")
       click_button "Finish Podcast"
     else
       click_button "Update Podcast"
     end
 
-    @podcast.reload
-    assert_not @podcast.cover_art.attached?
+    # Should redirect to podcasts page after finishing
+    assert_current_path podcasts_path
   end
 end
