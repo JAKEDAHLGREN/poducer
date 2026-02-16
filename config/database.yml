@@ -1,41 +1,59 @@
-# SQLite. Versions 3.8.0 and up are supported.
-#   gem install sqlite3
+# PostgreSQL configuration for Poducer
 #
-#   Ensure the SQLite 3 gem is defined in your Gemfile
-#   gem "sqlite3"
+# Make sure pg gem is in your Gemfile:
+#   gem "pg"
 #
 default: &default
-  adapter: sqlite3
+  adapter: postgresql
+  encoding: unicode
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  timeout: 5000
 
 development:
   <<: *default
-  database: storage/development.sqlite3
+  database: poducer_development
 
-# Warning: The database defined as "test" will be erased and
-# re-generated from your development database when you run "rake".
-# Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: storage/test.sqlite3
+  database: poducer_test
 
-
-# Store production database in the storage/ directory, which by default
-# is mounted as a persistent Docker volume in config/deploy.yml.
+# === PRODUCTION DATABASE CONFIGURATION ===
+#
+# When you're ready to deploy to production, you have two options:
+#
+# Option A: Set DATABASE_URL environment variable (simplest, recommended for most hosts)
+#   DATABASE_URL=postgres://username:password@hostname:5432/poducer_production
+#   Most platforms (Render, Railway, Heroku, Fly.io) set this automatically
+#   when you provision a PostgreSQL add-on.
+#
+# Option B: Set individual environment variables
+#   DATABASE_HOST=your-db-host.example.com  (e.g. db.render.com, your-rds-instance.amazonaws.com)
+#   DATABASE_USER=poducer
+#   DATABASE_PASSWORD=your-secure-password
+#   DATABASE_PORT=5432  (optional, defaults to 5432)
+#
+# For the Solid Cache/Queue/Cable databases, you can either:
+#   1. Use separate databases (as configured below) — best for high-traffic apps
+#   2. Consolidate into the primary database — simpler to manage, fine for most apps.
+#      To consolidate, just remove the cache/queue/cable sections and run all
+#      migrations against the primary database.
+#
 production:
-  primary:
+  primary: &production_default
     <<: *default
-    database: storage/production.sqlite3
+    database: poducer_production
+    username: <%= ENV["DATABASE_USER"] %>
+    password: <%= ENV["DATABASE_PASSWORD"] %>
+    host: <%= ENV["DATABASE_HOST"] %>
+    port: <%= ENV.fetch("DATABASE_PORT", 5432) %>
   cache:
-    <<: *default
-    database: storage/production_cache.sqlite3
+    <<: *production_default
+    database: poducer_production_cache
     migrations_paths: db/cache_migrate
   queue:
-    <<: *default
-    database: storage/production_queue.sqlite3
+    <<: *production_default
+    database: poducer_production_queue
     migrations_paths: db/queue_migrate
   cable:
-    <<: *default
-    database: storage/production_cable.sqlite3
+    <<: *production_default
+    database: poducer_production_cable
     migrations_paths: db/cable_migrate
