@@ -15,7 +15,8 @@ class PodcastStepsControllerTest < ActionDispatch::IntegrationTest
   test "overview validation failure stores errors and renders" do
     patch podcast_wizard_url(@podcast.id, :overview), params: { podcast: { name: "", description: "" } }
     assert_response :success
-    assert_includes session[:validation_errors] || [], "Name can't be blank"
+    # Response body HTML-escapes apostrophes (e.g. can't -> can&#39;t)
+    assert_includes response.body, "Name can&#39;t be blank"
   end
 
   test "overview success advances to next step" do

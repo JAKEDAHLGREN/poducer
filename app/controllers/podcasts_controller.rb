@@ -12,8 +12,8 @@ class PodcastsController < ApplicationController
   end
 
   def start_wizard
-    # Clean up any existing abandoned drafts for this user first
-    Current.user.podcasts.draft.where(name: [ nil, "" ]).destroy_all
+    # Clean up abandoned drafts (no name) older than 1 hour to avoid unbounded growth
+    Current.user.podcasts.draft.where(name: [ nil, "" ]).where("created_at < ?", 1.hour.ago).destroy_all
 
     @podcast = Podcast.new(user: Current.user, status: :draft)
     @podcast.save!(validate: false)  # Skip validations for initial creation

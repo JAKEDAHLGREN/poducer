@@ -3,18 +3,14 @@ class PodcastStepsController < ApplicationController
   steps :overview, :media, :categories, :summary
 
   before_action :set_podcast
+  before_action -> { authorize_resource_access(@podcast) }
   before_action :set_steps
 
   def show
-    # Clear any stored errors when showing a fresh form
-    session.delete(:validation_errors)
     render_wizard
   end
 
   def update
-    # Clear any previous errors
-    session.delete(:validation_errors)
-
     # Only assign attributes if there are podcast params (not on summary step)
     if params[:podcast].present?
       # Handle cover removal flag before attribute assignment
@@ -26,11 +22,17 @@ class PodcastStepsController < ApplicationController
       normalize_website_url
     end
 
-    # For summary step, we don't need to validate - just publish
+    # For summary step, validate required fields before publishing
     if step == steps.last
       process_cover_art_label if params[:podcast].present?
-      @podcast.update(status: :published)
-      redirect_to podcasts_path, notice: "Podcast created successfully"
+      overview_ok = @podcast.valid?(:overview_step)
+      categories_ok = @podcast.valid?(:categories_step)
+      if overview_ok && categories_ok
+        @podcast.update(status: :published)
+        redirect_to podcasts_path, notice: "Podcast created successfully"
+      else
+        render :summary
+      end
     else
       # Validate based on current step using a custom context
       valid = case step
@@ -51,8 +53,6 @@ class PodcastStepsController < ApplicationController
           render step
         end
       else
-        # Store errors in session to survive the render
-        session[:validation_errors] = @podcast.errors.full_messages
         render step
       end
     end

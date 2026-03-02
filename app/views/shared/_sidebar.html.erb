@@ -17,7 +17,7 @@
   <!-- Navigation Links -->
   <nav class="mt-6 px-4">
     <div class="space-y-2">
-      <% unless Current.user.producer? %>
+      <% if Current.user.admin? %>
         <%= link_to dashboards_path, class: sidebar_link_class(dashboards_path) do %>
           Dashboard
         <% end %>
@@ -32,12 +32,13 @@
       <%#= link_to "#", class: "flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors" do %>
         <%# Edit Requests %>
         <%# end %>
-        <% if Current.user.user? %>
-          <%= link_to podcasts_path, class: sidebar_link_class(podcasts_path, 'podcasts') do %>
-            Podcasts
-          <% end %>
+      <% if Current.user.user? %>
+        <%= link_to podcasts_path, class: sidebar_link_class(podcasts_path, 'podcasts') do %>
+          Podcasts
         <% end %>
+      <% end %>
 
+      <% if Current.user.admin? %>
         <%= link_to "#", class: "flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors" do %>
           Settings
         <% end %>
@@ -45,8 +46,9 @@
         <%= link_to "#", class: "flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors" do %>
           Help
         <% end %>
+      <% end %>
 
-        <%= button_to "Sign Out", sign_out_path, method: :delete, class: "flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors" %>
-      </div>
-    </nav>
-  </div>
+      <%= button_to "Sign Out", sign_out_path, method: :delete, class: "flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors" %>
+    </div>
+  </nav>
+</div>

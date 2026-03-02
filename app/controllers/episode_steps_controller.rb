@@ -11,7 +11,6 @@ class EpisodeStepsController < ApplicationController
   before_action -> { authorize_resource_access(@episode) }
 
   def show
-    session.delete(:validation_errors)
     render_wizard
   end
 
@@ -86,8 +85,6 @@ class EpisodeStepsController < ApplicationController
   end
 
   def update
-    session.delete(:validation_errors)
-
     filtered_params, assets_to_attach = filter_and_extract_params
     @episode.assign_attributes(filtered_params) if filtered_params.present?
 
@@ -103,7 +100,6 @@ class EpisodeStepsController < ApplicationController
         render step
       end
     else
-      session[:validation_errors] = @episode.errors.full_messages
       render step
     end
   end
