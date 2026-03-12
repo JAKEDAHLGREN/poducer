@@ -99,14 +99,6 @@ class Episode < ApplicationRecord
     draft?
   end
 
-  def is_editing_in_progress?
-    editing?
-  end
-
-  def is_complete?
-    episode_complete?
-  end
-
   after_update_commit :broadcast_status_change, if: :saved_change_to_status?
 
   private

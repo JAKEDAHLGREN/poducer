@@ -97,7 +97,7 @@ class FileUploadsTest < ApplicationSystemTestCase
   test "podcast wizard shows file upload components on media step" do
     sign_in_as_user
 
-    click_link "Create New Podcast"
+    click_button "Create New Podcast"
 
     # Should be on overview step - heading is h2
     assert_selector "h2", text: "PODCAST DETAILS"
@@ -115,7 +115,7 @@ class FileUploadsTest < ApplicationSystemTestCase
 
   test "podcast wizard displays instructions in dropzone" do
     sign_in_as_user
-    click_link "Create New Podcast"
+    click_button "Create New Podcast"
 
     fill_in "Name", with: "Upload Test Podcast"
     fill_in "Description", with: "Testing file uploads"
