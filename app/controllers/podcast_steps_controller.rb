@@ -25,7 +25,6 @@ class PodcastStepsController < ApplicationController
 
     # For summary step, validate required fields before publishing
     if step == steps.last
-      process_cover_art_label if params[:podcast].present?
       overview_ok = @podcast.valid?(:overview_step)
       categories_ok = @podcast.valid?(:categories_step)
       if overview_ok && categories_ok
