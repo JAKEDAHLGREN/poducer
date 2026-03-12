@@ -144,5 +144,4 @@ class EpisodesController < ApplicationController
       assets: []
     )
   end
-
 end
