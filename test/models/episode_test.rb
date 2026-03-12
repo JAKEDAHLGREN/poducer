@@ -144,20 +144,20 @@ class EpisodeTest < ActiveSupport::TestCase
     assert_not @episode.can_be_submitted_by_user?
   end
 
-  test "is_editing_in_progress? returns true only for editing" do
+  test "editing? returns true only for editing" do
     @episode.update_column(:status, Episode.statuses[:editing])
-    assert @episode.is_editing_in_progress?
+    assert @episode.editing?
 
     @episode.update_column(:status, Episode.statuses[:draft])
-    assert_not @episode.is_editing_in_progress?
+    assert_not @episode.editing?
   end
 
-  test "is_complete? returns true only for episode_complete" do
+  test "episode_complete? returns true only for episode_complete" do
     @episode.update_column(:status, Episode.statuses[:episode_complete])
-    assert @episode.is_complete?
+    assert @episode.episode_complete?
 
     @episode.update_column(:status, Episode.statuses[:draft])
-    assert_not @episode.is_complete?
+    assert_not @episode.episode_complete?
   end
 
   # === Validations ===

@@ -5,7 +5,6 @@ class EpisodesController < ApplicationController
   before_action :set_podcast
   before_action :set_episode, only: [ :show, :edit, :update, :destroy, :submit_episode, :start_editing, :complete_editing, :revert_to_draft, :re_submit_for_editing, :approve_episode, :publish_episode ]
   before_action -> { authorize_resource_access(@episode) }, only: [ :show, :edit, :update, :destroy, :submit_episode, :start_editing, :complete_editing, :revert_to_draft, :re_submit_for_editing, :approve_episode, :publish_episode ]
-  before_action :authorize_editing, only: [ :edit, :update ]
   before_action -> { authorize_resource_access(@podcast) }, only: [ :index ]
 
   def index
@@ -146,10 +145,4 @@ class EpisodesController < ApplicationController
     )
   end
 
-  # This method can stay as-is since it has specific business logic
-  def authorize_editing
-    if Current.user.user?
-      redirect_to podcast_episodes_path(@podcast), alert: "Access denied." unless @episode.podcast.user == Current.user
-    end
-  end
 end

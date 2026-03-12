@@ -32,8 +32,8 @@ class EpisodeStepsController < ApplicationController
 
   # PATCH /podcasts/:podcast_id/episodes/:episode_id/wizard/raw_audio
   def raw_audio
-    # Accept either file or files[]
-    file = params[:file].presence || Array(params[:files]).first
+    # Accept either files[] or file (prefer plural, matching FileAttachable convention)
+    file = Array(params[:files]).first || params[:file]
     unless file.present?
       return render json: { error: "No file provided" }, status: :unprocessable_entity
     end
@@ -155,7 +155,7 @@ class EpisodeStepsController < ApplicationController
     case step
     when :overview then @episode.valid?(:overview_step)
     when :details  then @episode.valid?(:details_step)
-    when :summary  then @episode.valid?(:overview_step) & @episode.valid?(:details_step)
+    when :summary  then @episode.valid?(:overview_step) && @episode.valid?(:details_step)
     else true
     end
   end
