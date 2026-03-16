@@ -154,8 +154,9 @@ class EpisodeStepsController < ApplicationController
   def valid_for_current_step?
     case step
     when :overview then @episode.valid?(:overview_step)
+    when :assets   then @episode.valid?(:assets)
     when :details  then @episode.valid?(:details_step)
-    when :summary  then @episode.valid?(:overview_step) & @episode.valid?(:details_step)
+    when :summary  then @episode.valid?(:overview_step) && @episode.valid?(:details_step) && @episode.valid?(:assets)
     else true
     end
   end
@@ -190,6 +191,10 @@ class EpisodeStepsController < ApplicationController
       :deliver_mov,
       :raw_audio,
       :cover_art,
+      :media_type,
+      :episode_kind,
+      :edits_timestamps,
+      :explicit,
       assets: [],
       output_formats: []
     )

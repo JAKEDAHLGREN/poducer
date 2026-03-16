@@ -4,7 +4,10 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
         <%= f.label :release_date, "Scheduled Release Date", class: "block text-sm font-medium text-gray-700 mb-2" %>
-        <%= f.date_field :release_date, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" %>
+        <%= f.date_field :release_date, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 #{@episode.errors[:release_date].any? ? 'border-red-300' : ''}" %>
+        <% if @episode.errors[:release_date].any? %>
+          <p class="mt-1 text-sm text-red-600"><%= @episode.errors[:release_date].join(", ") %></p>
+        <% end %>
       </div>
       <div>
         <%= f.label :format, "Episode Format", class: "block text-sm font-medium text-gray-700 mb-2" %>
@@ -23,6 +26,18 @@
         <%= f.label :links, "Links (comma-separated)", class: "block text-sm font-medium text-gray-700 mb-2" %>
         <%= f.text_field :links, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500", placeholder: "https://example.com, https://twitter.com/handle" %>
       </div>
+    </div>
+    <div class="mt-6">
+      <%= f.label :edits_timestamps, "Edits / Timestamps", class: "block text-sm font-medium text-gray-700 mb-2" %>
+      <%= f.text_area :edits_timestamps, rows: 3, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500", placeholder: "e.g. 0:00 Intro, 2:30 Topic A, 15:00 Outro..." %>
+    </div>
+    <div class="mt-6">
+      <label class="block text-sm font-medium text-gray-700 mb-2">Content</label>
+      <label class="inline-flex items-center gap-2">
+        <%= f.check_box :explicit, { class: "h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500" }, true, false %>
+        <span class="text-sm text-gray-800">Explicit content</span>
+      </label>
+      <p class="text-xs text-gray-500 mt-1">Check if this episode contains explicit language or content.</p>
     </div>
     <div class="mt-6">
       <%= f.label :notes, "Production Notes", class: "block text-sm font-medium text-gray-700 mb-2" %>

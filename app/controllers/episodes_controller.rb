@@ -141,6 +141,10 @@ class EpisodesController < ApplicationController
       :raw_audio,
       :edited_audio,
       :cover_art,
+      :media_type,
+      :episode_kind,
+      :edits_timestamps,
+      :explicit,
       output_formats: [],
       assets: []
     )

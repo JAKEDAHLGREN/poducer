@@ -10,6 +10,12 @@ class Episode < ApplicationRecord
     "Other"
   ].freeze
 
+  # Type of media for this episode (determines which assets are required)
+  MEDIA_TYPES = %w[audio video].freeze
+
+  # Episode type: Full, Trailer, Bonus
+  EPISODE_KINDS = %w[full trailer bonus].freeze
+
   # File/output formats the user may request for the final deliverables
   OUTPUT_FORMAT_OPTIONS = [
     "MP3 128kbps",
@@ -44,7 +50,16 @@ class Episode < ApplicationRecord
 
   # Wizard step validations
   validates :name, :description, presence: true, on: :overview_step
-  validates :notes, presence: true, on: :details_step
+  validates :description, length: { maximum: 4_000, message: "must be under 4,000 characters" }, on: :overview_step
+  validates :episode_kind, presence: true, inclusion: { in: EPISODE_KINDS }, on: :overview_step
+  validates :release_date, presence: true, on: :details_step
+  validates :media_type, presence: true, inclusion: { in: MEDIA_TYPES }, on: :assets
+  validate :assets_or_raw_audio_present, on: :assets
+
+  def assets_or_raw_audio_present
+    return if assets.attached? || raw_audio.attached?
+    errors.add(:base, "Please upload at least one asset (raw audio or assets)")
+  end
 
   # Helpers for output formats stored as comma-separated text
   def output_formats_list

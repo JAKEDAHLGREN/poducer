@@ -12,6 +12,9 @@
         <p class="text-gray-600">
           Add a cover image for your podcast and an optional website URL.
         </p>
+        <% if @podcast.errors[:cover_art].any? %>
+          <p class="mt-2 text-sm text-red-600"><%= @podcast.errors.full_messages_for(:cover_art).join(", ") %></p>
+        <% end %>
       </div>
 
       <div class="grid grid-cols-1">

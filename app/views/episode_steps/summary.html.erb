@@ -18,10 +18,18 @@
           <%= f.label :number, "Episode Number", class: "block text-sm font-medium text-gray-700 mb-2" %>
           <%= f.number_field :number, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" %>
         </div>
+        <div>
+          <%= f.label :episode_kind, "Episode Type", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= f.select :episode_kind,
+              options_for_select(Episode::EPISODE_KINDS.map { |k| [k.capitalize, k] }, @episode.episode_kind),
+              { prompt: "Select type" },
+              { class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" } %>
+        </div>
       </div>
       <div>
         <%= f.label :description, "Episode Description", class: "block text-sm font-medium text-gray-700 mb-2" %>
-        <%= f.text_area :description, rows: 4, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" %>
+        <p class="text-xs text-gray-500 mb-1">Maximum 4,000 characters.</p>
+        <%= f.text_area :description, rows: 4, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500", maxlength: 4000 %>
       </div>
     </div>
 
@@ -30,7 +38,7 @@
       <h3 class="text-lg font-medium text-gray-900">Details</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <%= f.label :release_date, "Release Date", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= f.label :release_date, "Scheduled Release Date", class: "block text-sm font-medium text-gray-700 mb-2" %>
           <%= f.date_field :release_date, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" %>
         </div>
         <div>
@@ -52,21 +60,15 @@
         </div>
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Final Output Formats</label>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <label class="inline-flex items-center gap-2">
-            <%= f.check_box :deliver_mp3, { class: "h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500" }, true, false %>
-            <span class="text-sm text-gray-800">MP3</span>
-          </label>
-          <label class="inline-flex items-center gap-2">
-            <%= f.check_box :deliver_mp4, { class: "h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500" }, true, false %>
-            <span class="text-sm text-gray-800">MP4</span>
-          </label>
-          <label class="inline-flex items-center gap-2">
-            <%= f.check_box :deliver_mov, { class: "h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500" }, true, false %>
-            <span class="text-sm text-gray-800">MOV</span>
-          </label>
-        </div>
+        <%= f.label :edits_timestamps, "Edits / Timestamps", class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= f.text_area :edits_timestamps, rows: 2, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" %>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Content</label>
+        <label class="inline-flex items-center gap-2">
+          <%= f.check_box :explicit, { class: "h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500" }, true, false %>
+          <span class="text-sm text-gray-800">Explicit content</span>
+        </label>
       </div>
       <div>
         <%= f.label :notes, "Production Notes", class: "block text-sm font-medium text-gray-700 mb-2" %>
@@ -95,18 +97,22 @@
         </div>
 
         <div class="col-span-1">
+          <p class="text-sm font-medium text-gray-700 mb-1">Type of Media</p>
+          <p class="text-sm text-gray-600"><%= @episode.media_type.present? ? @episode.media_type.capitalize : "—" %></p>
+        </div>
+        <div class="col-span-1">
           <!-- Assets -->
           <%= render "shared/file_upload",
                 form: f,
                 attachment_name: :assets,
                 multiple: true,
-                accept: "audio/*,video/*,audio/wav,audio/wave,audio/x-wav,.wav,.mp3,.m4a,.aac,.ogg,.flac,.mp4,.mov,.avi,.mkv,.webm",
+                accept: "audio/*,video/*,.mp3,.mp4,.wav,.mpg,.mov",
                 existing_files: @episode.assets.attachments,
                 delete_url: wizard_destroy_asset_path(podcast_id: @podcast.id, episode_id: @episode.id, attachment_id: ":id"),
                 label_param: "asset_labels",
-                section_label: "Upload Audio/Video",
+                section_label: "Upload Assets",
                 instructions: "Drag and drop audio/video files here, or",
-                hint: "You can select multiple files." %>
+                hint: "Accepted file types: MP3, MP4, WAV, MPG, MOV" %>
         </div>
       </div>
     </div>

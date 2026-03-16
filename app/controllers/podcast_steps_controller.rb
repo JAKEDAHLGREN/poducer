@@ -22,12 +22,13 @@ class PodcastStepsController < ApplicationController
       normalize_website_url
     end
 
-    # For summary step, validate required fields before publishing
+    # For summary step, validate required fields (including cover art) before publishing
     if step == steps.last
       process_cover_art_label if params[:podcast].present?
       overview_ok = @podcast.valid?(:overview_step)
       categories_ok = @podcast.valid?(:categories_step)
-      if overview_ok && categories_ok
+      summary_ok = @podcast.valid?(:summary_step)
+      if overview_ok && categories_ok && summary_ok
         @podcast.update(status: :published)
         redirect_to podcasts_path, notice: "Podcast created successfully"
       else
@@ -38,10 +39,12 @@ class PodcastStepsController < ApplicationController
       valid = case step
       when :overview
         @podcast.valid?(:overview_step)
+      when :media
+        @podcast.valid?(:media_step)
       when :categories
         @podcast.valid?(:categories_step)
       else
-        true # No validation for other steps
+        true
       end
 
       if valid
@@ -69,7 +72,7 @@ class PodcastStepsController < ApplicationController
   end
 
   def podcast_params
-    params.require(:podcast).permit(:name, :description, :website_url, :primary_category, :secondary_category, :tertiary_category, :cover_art, :explicit, :episode_type)
+    params.require(:podcast).permit(:name, :host_name, :description, :website_url, :primary_category, :secondary_category, :tertiary_category, :cover_art, :explicit, :episode_type)
   end
 
   def normalize_website_url

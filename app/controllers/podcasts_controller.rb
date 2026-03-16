@@ -61,6 +61,6 @@ class PodcastsController < ApplicationController
   end
 
   def podcast_params
-    params.require(:podcast).permit(:name, :description, :website_url, :primary_category, :secondary_category, :tertiary_category, :cover_art, media: [])
+    params.require(:podcast).permit(:name, :host_name, :description, :website_url, :primary_category, :secondary_category, :tertiary_category, :cover_art, media: [])
   end
 end

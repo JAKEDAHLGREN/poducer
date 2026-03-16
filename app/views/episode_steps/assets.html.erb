@@ -2,24 +2,23 @@
   <%= render "podcast_steps/progress_bar", wizard_steps: @steps %>
 
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden p-6 space-y-8">
-    <!-- Deliverables -->
+    <!-- Type of Media -->
     <div>
-      <h3 class="text-lg font-medium text-gray-900 mb-3">Edited File Formats</h3>
-      <p class="text-sm text-gray-600 mb-3">Select your preferred file format(s) </p>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <h3 class="text-lg font-medium text-gray-900 mb-3">Type of Media</h3>
+      <p class="text-sm text-gray-600 mb-3">Choose whether this episode is audio or video.</p>
+      <div class="flex gap-6">
         <label class="inline-flex items-center gap-2">
-          <%= f.check_box :deliver_mp3, { class: "h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500" }, true, false %>
-          <span class="text-sm text-gray-800">MP3</span>
+          <%= f.radio_button :media_type, "audio", class: "h-4 w-4 rounded-full border-gray-300 text-orange-600 focus:ring-orange-500" %>
+          <span class="text-sm text-gray-800">Audio</span>
         </label>
         <label class="inline-flex items-center gap-2">
-          <%= f.check_box :deliver_mp4, { class: "h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500" }, true, false %>
-          <span class="text-sm text-gray-800">MP4</span>
-        </label>
-        <label class="inline-flex items-center gap-2">
-          <%= f.check_box :deliver_mov, { class: "h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500" }, true, false %>
-          <span class="text-sm text-gray-800">MOV</span>
+          <%= f.radio_button :media_type, "video", class: "h-4 w-4 rounded-full border-gray-300 text-orange-600 focus:ring-orange-500" %>
+          <span class="text-sm text-gray-800">Video</span>
         </label>
       </div>
+      <% if @episode.errors[:media_type].any? %>
+        <p class="mt-1 text-sm text-red-600"><%= @episode.errors[:media_type].join(", ") %></p>
+      <% end %>
     </div>
 
     <!-- Cover Art -->
@@ -40,13 +39,13 @@
           form: f,
           attachment_name: :assets,
           multiple: true,
-          accept: "audio/*,video/*,audio/wav,audio/wave,audio/x-wav,.wav,.mp3,.m4a,.aac,.ogg,.flac,.mp4,.mov,.avi,.mkv,.webm",
+          accept: "audio/*,video/*,.mp3,.mp4,.wav,.mpg,.mov",
           existing_files: @episode.assets.attachments,
           delete_url: wizard_destroy_asset_path(podcast_id: @podcast.id, episode_id: @episode.id, attachment_id: ":id"),
           label_param: "asset_labels",
           section_label: "Upload Assets",
           instructions: "Drag and drop audio/video files here, or",
-          hint: "You can select multiple files." %>
+          hint: "Accepted file types: MP3, MP4, WAV, MPG, MOV" %>
 
   </div>
 

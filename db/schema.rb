@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_07_001000) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_01_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -60,6 +60,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_07_001000) do
     t.boolean "deliver_mp3", default: false, null: false
     t.boolean "deliver_mp4", default: false, null: false
     t.boolean "deliver_mov", default: false, null: false
+    t.string "media_type"
+    t.string "episode_kind"
+    t.text "edits_timestamps"
+    t.boolean "explicit", default: false, null: false
     t.index ["podcast_id", "number"], name: "index_episodes_on_podcast_id_and_number", unique: true
     t.index ["podcast_id"], name: "index_episodes_on_podcast_id"
     t.index ["release_date"], name: "index_episodes_on_release_date"
@@ -80,6 +84,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_07_001000) do
     t.boolean "explicit", default: false, null: false
     t.text "keywords"
     t.integer "episode_type", default: 0, null: false
+    t.string "host_name"
     t.index ["episode_type"], name: "index_podcasts_on_episode_type"
     t.index ["primary_category"], name: "index_podcasts_on_primary_category"
     t.index ["status"], name: "index_podcasts_on_status"

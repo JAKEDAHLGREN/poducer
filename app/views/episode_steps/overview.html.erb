@@ -26,8 +26,20 @@
       </div>
 
       <div class="mt-6 col-span-3">
+        <%= f.label :episode_kind, "Episode Type", class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= f.select :episode_kind,
+            options_for_select(Episode::EPISODE_KINDS.map { |k| [k.capitalize, k] }, @episode.episode_kind),
+            { prompt: "Select type" },
+            { class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" } %>
+        <% if @episode.errors[:episode_kind].any? %>
+          <p class="mt-1 text-sm text-red-600"><%= @episode.errors[:episode_kind].join(", ") %></p>
+        <% end %>
+      </div>
+
+      <div class="mt-6 col-span-3">
         <%= f.label :description, "Episode Description", class: "block text-sm font-medium text-gray-700 mb-2" %>
-        <%= f.text_area :description, rows: 4, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500", placeholder: "Describe what this episode is about..." %>
+        <p class="text-xs text-gray-500 mb-1">Maximum 4,000 characters.</p>
+        <%= f.text_area :description, rows: 4, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500", placeholder: "Describe what this episode is about...", maxlength: 4000 %>
 
         <% if @episode.errors[:description].any? %>
           <p class="mt-1 text-sm text-red-600">
